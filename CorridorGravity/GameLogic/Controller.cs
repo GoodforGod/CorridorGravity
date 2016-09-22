@@ -7,6 +7,6 @@ namespace CorridorGravity.GameLogic
 {
     class Controller
     {
-
+    
     }
 }

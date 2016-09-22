@@ -12,6 +12,6 @@ namespace CorridorGravity.GameLogic
 {
     class EnviromentEntity : Entity
     {
-
+    
     }
 }

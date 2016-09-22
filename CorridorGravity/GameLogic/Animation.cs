@@ -12,7 +12,7 @@ namespace CorridorGravity.GameLogic
     {
         private List<AnimationFrame> frames = new List<AnimationFrame>();
         private TimeSpan timeIntoAnimation;
-
+    
         TimeSpan Duration {
             get {
                 double totalSeconds = 0;

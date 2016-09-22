@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace CorridorGravity
-{
+{ 
     /// <summary>
     /// The main class.
     /// </summary>

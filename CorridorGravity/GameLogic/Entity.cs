@@ -16,6 +16,5 @@ namespace CorridorGravity.GameLogic
         public virtual void Draw() { }
 
         public virtual void Update() { }
-
     }
 }

@@ -8,7 +8,7 @@ namespace CorridorGravity.GameLogic
     public class AnimationFrame
     {
         public Rectangle SourceRectangle { get; set; }
-
+    
         public TimeSpan Duration { get; set; }
     }
 }
