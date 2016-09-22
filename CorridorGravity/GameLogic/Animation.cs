@@ -10,20 +10,20 @@ namespace CorridorGravity.GameLogic
 {
     public class Animation
     {
-        private List<AnimationFrame> frames = new List<AnimationFrame>();
-        private TimeSpan timeIntoAnimation;
+        private List<AnimationFrame> FrameList = new List<AnimationFrame>();
+        private TimeSpan TimeIntoAnimation;
     
         TimeSpan Duration {
             get {
                 double totalSeconds = 0;
-                foreach (var frame in frames)
+                foreach (var frame in FrameList)
                     totalSeconds += frame.Duration.TotalSeconds;
                 return TimeSpan.FromSeconds(totalSeconds);
             }
         }
 
         public void AddFrame(Rectangle rectangle, TimeSpan duration) {
-            frames.Add(new AnimationFrame() {
+            FrameList.Add(new AnimationFrame() {
                 SourceRectangle = rectangle,
                 Duration = duration
             });
@@ -31,11 +31,11 @@ namespace CorridorGravity.GameLogic
 
         public void Update(GameTime gameTime) {
             double secondsIntoAnimation =
-                timeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
+                TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
 
             double remainder = secondsIntoAnimation % Duration.TotalSeconds;
 
-            timeIntoAnimation = TimeSpan.FromSeconds(remainder);
+            TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
         }
 
         public Rectangle CurrentRectangle {
@@ -43,8 +43,8 @@ namespace CorridorGravity.GameLogic
                 AnimationFrame currentFrame = null;
                 TimeSpan accumulatedTime = new TimeSpan();
 
-                foreach (var frame in frames) {
-                    if (accumulatedTime + frame.Duration >= timeIntoAnimation) {
+                foreach (var frame in FrameList) {
+                    if (accumulatedTime + frame.Duration >= TimeIntoAnimation) {
                         currentFrame = frame;
                         break;
                     }
@@ -52,7 +52,7 @@ namespace CorridorGravity.GameLogic
                 }
 
                 if (currentFrame == null)
-                    currentFrame = frames.LastOrDefault();
+                    currentFrame = FrameList.LastOrDefault();
                 if (currentFrame != null)
                     return currentFrame.SourceRectangle;
                 else

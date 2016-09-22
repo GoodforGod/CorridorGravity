@@ -11,7 +11,7 @@ namespace CorridorGravity
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-    
+
         public GameEngine()
         {
             graphics = new GraphicsDeviceManager(this);
