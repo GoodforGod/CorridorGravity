@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using CorridorGravity.GameLogic;
 
 namespace CorridorGravity
 {
@@ -11,6 +12,8 @@ namespace CorridorGravity
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+
+        PlayerEntity FirstCharacter;
 
         public GameEngine()
         {
@@ -27,7 +30,8 @@ namespace CorridorGravity
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            FirstCharacter = new PlayerEntity(Content, "player-2-white");
+            FirstCharacter.Init();
             base.Initialize();
         }
 
@@ -63,6 +67,9 @@ namespace CorridorGravity
                 Exit();
 
             // TODO: Add your update logic here
+            FirstCharacter.Update(gameTime);
+            
+
 
             base.Update(gameTime);
         }
@@ -74,9 +81,14 @@ namespace CorridorGravity
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
+            spriteBatch.Begin();
             // TODO: Add your drawing code here
 
+            FirstCharacter.Draw(spriteBatch);
+
+
+
+            spriteBatch.End();
             base.Draw(gameTime);
         }
     }

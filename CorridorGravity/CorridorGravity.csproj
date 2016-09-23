@@ -39,12 +39,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GameEngine.cs" />
-    <Compile Include="GameLogic\Animation.cs" />
-    <Compile Include="GameLogic\AnimationFrame.cs" />
+    <Compile Include="GameLogic\Animator\AnimatedEntity\Alice.cs" />
+    <Compile Include="GameLogic\Animator\AnimatedEntity\Bob.cs" />
+    <Compile Include="GameLogic\Animator\Animation.cs" />
+    <Compile Include="GameLogic\Animator\AnimationFrame.cs" />
+    <Compile Include="GameLogic\Animator\EntityAnimation.cs" />
     <Compile Include="GameLogic\Controller.cs" />
-    <Compile Include="GameLogic\Entity.cs" />
-    <Compile Include="GameLogic\EnviromentEntity.cs" />
-    <Compile Include="GameLogic\PlayerEntity.cs" />
+    <Compile Include="GameLogic\Entity\Entity.cs" />
+    <Compile Include="GameLogic\Entity\EnviromentEntity.cs" />
+    <Compile Include="GameLogic\Entity\PlayerEntity.cs" />
     <Compile Include="GameLogic\World.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

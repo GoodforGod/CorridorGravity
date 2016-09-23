@@ -10,21 +10,25 @@ namespace CorridorGravity.GameLogic
     {
         public Entity() { }
 
-        private Entity(ContentManager content) { }
+        public Entity(ContentManager content) { }
 
-        private Entity(ContentManager content, string contentName) { }
+        public Entity(ContentManager content, string contentName) { }
 
-        public Texture2D EntitySprite { get; }
+        abstract public Texture2D EntitySprite { get; }
 
-        public float X { get; set; }
+        abstract public float X { get; set; }
 
-        public float Y { get; set; }
+        abstract public float Y { get; set; }
 
         public virtual void Init() { }
 
         public virtual void Draw() { }
 
+        public virtual void Draw(SpriteBatch bather) { }
+
         public virtual void Update() { }
+
+        public virtual void Update(GameTime gameTime) { }
 
         public virtual void Touch() { }
     }

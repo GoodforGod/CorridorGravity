@@ -7,6 +7,11 @@ namespace CorridorGravity.GameLogic
 {
     class Controller
     {
-    
+        Vector2 GetDesiredVelocityFromInput()
+        {
+
+
+            return new Vector2(1,1);
+        }
     }
 }
