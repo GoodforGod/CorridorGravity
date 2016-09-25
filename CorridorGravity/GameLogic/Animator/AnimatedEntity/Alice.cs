@@ -10,9 +10,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace CorridorGravity.GameLogic.AnimatedEntity
 {
-    class Alice : EntityAnimation
+    class Alice : AnimationEntity
     {
-        public const double INTERVAL = .25;
+        public const double INTERVAL = .15;
 
         public Alice()
         {

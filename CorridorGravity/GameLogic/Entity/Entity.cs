@@ -16,9 +16,9 @@ namespace CorridorGravity.GameLogic
 
         abstract public Texture2D EntitySprite { get; }
 
-        abstract public float X { get; set; }
+        virtual public float X { get; set; }
 
-        abstract public float Y { get; set; }
+        virtual public float Y { get; set; }
 
         public virtual void Init() { }
 

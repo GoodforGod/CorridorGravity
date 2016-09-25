@@ -7,9 +7,9 @@ using CorridorGravity.GameLogic.Animator;
 
 namespace CorridorGravity.GameLogic.Animator
 {
-    abstract class EntityAnimation
+    abstract class AnimationEntity
     {
-        public const double DEFAULT_INTERVAL = 0.25;
+        public const double DEFAULT_INTERVAL = 0.15;
 
         public abstract Animation Idle { get; }
 

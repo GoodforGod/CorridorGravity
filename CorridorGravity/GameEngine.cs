@@ -13,11 +13,20 @@ namespace CorridorGravity
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private const int FRAME_WIDTH = 1024;
+        private const int FRAME_HEIGHT = 768;
+
+        private const string ENTITY_TYPE = "player-2-white-1";
+
         PlayerEntity FirstCharacter;
+        WorldEntity World;
 
         public GameEngine()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = FRAME_WIDTH;
+            graphics.PreferredBackBufferHeight = FRAME_HEIGHT;
+            graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
 
@@ -30,8 +39,14 @@ namespace CorridorGravity
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            FirstCharacter = new PlayerEntity(Content, "player-2-white");
+            this.IsMouseVisible = true;
+
+            World = new WorldEntity(Content, "world-background", FRAME_WIDTH, FRAME_HEIGHT);
+            World.Init();
+            
+            FirstCharacter = new PlayerEntity(Content, ENTITY_TYPE, World.WORLD_HEIGHT, World.WORLD_WIDTH);
             FirstCharacter.Init();
+
             base.Initialize();
         }
 
@@ -65,11 +80,11 @@ namespace CorridorGravity
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
             // TODO: Add your update logic here
+
+            // Characters Updates
             FirstCharacter.Update(gameTime);
             
-
 
             base.Update(gameTime);
         }
@@ -80,14 +95,17 @@ namespace CorridorGravity
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Azure);
             spriteBatch.Begin();
             // TODO: Add your drawing code here
 
+            // Background
+            World.Draw(spriteBatch);
+
+            //Characters
             FirstCharacter.Draw(spriteBatch);
 
-
-
+            
             spriteBatch.End();
             base.Draw(gameTime);
         }

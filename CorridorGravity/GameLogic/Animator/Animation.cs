@@ -29,6 +29,11 @@ namespace CorridorGravity.GameLogic
             });
         }
 
+        public void ResetTimer()
+        {
+            TimeIntoAnimation = TimeSpan.FromSeconds(0);
+        }
+
         public void Update(GameTime gameTime) {
             double secondsIntoAnimation =
                 TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;

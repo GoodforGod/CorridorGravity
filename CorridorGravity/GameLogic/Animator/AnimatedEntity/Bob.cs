@@ -10,9 +10,9 @@ using Microsoft.Xna.Framework.Input;
 
 namespace CorridorGravity.GameLogic.AnimatedEntity
 {
-    class Bob : EntityAnimation
+    class Bob : AnimationEntity
     {
-        public const double INTERVAL = .25; 
+        public const double INTERVAL = .15; 
 
         public Bob()
         {
@@ -27,28 +27,28 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             Celebrate = new Animation();
 
             // Idle 192x84 (each 48x84) start in 6x15
-            Idle.AddFrame(new Rectangle(6, 15, 48, 84), TimeSpan.FromSeconds(INTERVAL));
-            Idle.AddFrame(new Rectangle(54, 15, 48, 84), TimeSpan.FromSeconds(INTERVAL));
-            Idle.AddFrame(new Rectangle(102, 15, 48, 84), TimeSpan.FromSeconds(INTERVAL));
-            Idle.AddFrame(new Rectangle(150, 15, 48, 84), TimeSpan.FromSeconds(INTERVAL));
-            Idle.AddFrame(new Rectangle(102, 15, 48, 84), TimeSpan.FromSeconds(INTERVAL));
-            Idle.AddFrame(new Rectangle(54, 15, 48, 84), TimeSpan.FromSeconds(INTERVAL));
+            Idle.AddFrame(new Rectangle(6, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL));
+            Idle.AddFrame(new Rectangle(54, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL));
+            Idle.AddFrame(new Rectangle(102, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL));
+            Idle.AddFrame(new Rectangle(150, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL));
+            Idle.AddFrame(new Rectangle(102, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL));
+            Idle.AddFrame(new Rectangle(54, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL));
 
             // Walk 240x82 (each 60x82) start in 3x239
-            Walk.AddFrame(new Rectangle(3, 239, 60, 82), TimeSpan.FromSeconds(INTERVAL));
-            Walk.AddFrame(new Rectangle(63, 239, 60, 82), TimeSpan.FromSeconds(INTERVAL));
-            Walk.AddFrame(new Rectangle(123, 239, 60, 82), TimeSpan.FromSeconds(INTERVAL));
-            Walk.AddFrame(new Rectangle(183, 239, 60, 82), TimeSpan.FromSeconds(INTERVAL));
-            Walk.AddFrame(new Rectangle(243, 239, 60, 82), TimeSpan.FromSeconds(INTERVAL));
+            Walk.AddFrame(new Rectangle(3, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL));
+            Walk.AddFrame(new Rectangle(50, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL));
+            Walk.AddFrame(new Rectangle(99, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL));
+            Walk.AddFrame(new Rectangle(149, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL));
+            Walk.AddFrame(new Rectangle(199, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL));
 
             // Jump 164x92 (each 41x92) start in 205x7
-            Jump.AddFrame(new Rectangle(205, 7, 16, 92), TimeSpan.FromSeconds(INTERVAL));
-            Jump.AddFrame(new Rectangle(246, 7, 16, 92), TimeSpan.FromSeconds(INTERVAL));
-            Jump.AddFrame(new Rectangle(287, 7, 16, 92), TimeSpan.FromSeconds(INTERVAL));
-            Jump.AddFrame(new Rectangle(328, 7, 16, 92), TimeSpan.FromSeconds(INTERVAL));
-            Jump.AddFrame(new Rectangle(287, 7, 16, 92), TimeSpan.FromSeconds(INTERVAL));
-            Jump.AddFrame(new Rectangle(246, 7, 16, 92), TimeSpan.FromSeconds(INTERVAL));
-            Jump.AddFrame(new Rectangle(205, 7, 16, 92), TimeSpan.FromSeconds(INTERVAL));
+            //Jump.AddFrame(new Rectangle(206, 9, 44, 90), TimeSpan.FromSeconds(INTERVAL));
+            Jump.AddFrame(new Rectangle(254, 9, 36, 90), TimeSpan.FromSeconds(INTERVAL));
+            Jump.AddFrame(new Rectangle(296, 9, 32, 90), TimeSpan.FromSeconds(INTERVAL));
+            Jump.AddFrame(new Rectangle(332, 9, 36, 90), TimeSpan.FromSeconds(INTERVAL));
+            Jump.AddFrame(new Rectangle(296, 9, 32, 90), TimeSpan.FromSeconds(INTERVAL));
+            Jump.AddFrame(new Rectangle(254, 9, 36, 90), TimeSpan.FromSeconds(INTERVAL));
+            //Jump.AddFrame(new Rectangle(206, 9, 44, 90), TimeSpan.FromSeconds(INTERVAL));
 
             // Intro equal Celebrate
 
