@@ -35,7 +35,7 @@ namespace CorridorGravity.GameLogic
 
         private float VelocityAxisY = 0;
         private float VelocityAxisX = 0;
-        private int accum = 0;
+        private int accum = -1;
 
         private int LEVEL_HEIGHT { get; set; }
         private int LEVEL_WIDTH { get; set; }
@@ -69,14 +69,22 @@ namespace CorridorGravity.GameLogic
 
         private void IncreaseVelocityRight()                // If right key down & speed not max, then accelerate
         {
-            if (IsGrounded() && VelocityAxisX < VELOCITY_LIMIT_X_AXIS)
+            if (IsGrounded())
             {
                 switch (LEVEL_DIMENTION)
                 {
                     case 0:
-                    case 2: VelocityAxisX += ACCELERATION_X_AXIS; break;
+                    case 2:
+                        if (VelocityAxisX < VELOCITY_LIMIT_X_AXIS)
+                            VelocityAxisX += ACCELERATION_X_AXIS;
+                        PLAYER_DIRECTION = false;
+                        break;
                     case 1: 
-                    case 3: VelocityAxisY -= ACCELERATION_X_AXIS; break; 
+                    case 3:
+                        if (VelocityAxisY > -VELOCITY_LIMIT_X_AXIS)
+                            VelocityAxisY -= ACCELERATION_X_AXIS;
+                        PLAYER_DIRECTION = true;
+                        break; 
                     default: break;
                 }
                 
@@ -104,14 +112,22 @@ namespace CorridorGravity.GameLogic
 
         private void IncreaseVelocityLeft()                 // If left key down & speed not max, then accelerate
         {
-            if (IsGrounded() && VelocityAxisX > -VELOCITY_LIMIT_X_AXIS)
+            if (IsGrounded())
             {
                 switch (LEVEL_DIMENTION)
                 {
                     case 0: 
-                    case 2: VelocityAxisX -= ACCELERATION_X_AXIS; break;
+                    case 2:
+                        if (VelocityAxisX > -VELOCITY_LIMIT_X_AXIS)
+                            VelocityAxisX -= ACCELERATION_X_AXIS;
+                        PLAYER_DIRECTION = true;
+                        break;
                     case 1: 
-                    case 3: VelocityAxisY += ACCELERATION_X_AXIS; break;
+                    case 3:
+                        if (VelocityAxisY < VELOCITY_LIMIT_X_AXIS)
+                            VelocityAxisY += ACCELERATION_X_AXIS;
+                        PLAYER_DIRECTION = false;
+                        break;
                     default: break;
                 }
                 
@@ -138,20 +154,40 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        private void SlowVelocityRight()                //Slow down acceleration
+        private void SlowVelocityRight()                    //Slow down acceleration
         {
-            VelocityAxisX -= ACCELERATION_X_AXIS;
-            if (VelocityAxisX < 0)
-                VelocityAxisX = 0;
-            PLAYER_DIRECTION = false;
+            if (LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2)
+            {
+                VelocityAxisX -= ACCELERATION_X_AXIS;
+                if (VelocityAxisX < 0)
+                    VelocityAxisX = 0;
+                PLAYER_DIRECTION = false;
+            }
+            else
+            {
+                VelocityAxisY += ACCELERATION_X_AXIS;
+                if (VelocityAxisY > 0)
+                    VelocityAxisY = 0;
+                PLAYER_DIRECTION = true;
+            }
         }
 
-        private void SlowVelocityLeft()                 // Slow down acceleration
+        private void SlowVelocityLeft()                     // Slow down acceleration
         {
-            VelocityAxisX += ACCELERATION_X_AXIS; 
-            if (VelocityAxisX > 0)
-                VelocityAxisX = 0;
-            PLAYER_DIRECTION = true;
+            if (LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2)
+            {
+                VelocityAxisX += ACCELERATION_X_AXIS;
+                if (VelocityAxisX > 0)
+                    VelocityAxisX = 0;
+                PLAYER_DIRECTION = true;
+            }
+            else
+            {
+                VelocityAxisY -= ACCELERATION_X_AXIS;
+                if (VelocityAxisY < 0)
+                    VelocityAxisY = 0;
+                PLAYER_DIRECTION = false;
+            }
         }
 
         private void UpdateVelocityFromInput()              // Update velocity via input & check for gravity collapse
@@ -166,35 +202,43 @@ namespace CorridorGravity.GameLogic
             if (state.IsKeyDown(Keys.Left) || state.IsKeyDown(Keys.A))
                 leftState = true;
 
-            // Test code section BEGIN #######################
+            // Test code section BEGIN ############################
 
-            if (state.IsKeyDown(Keys.C) && accum == 0)      // RightWall
+            if (state.IsKeyDown(Keys.C) && accum == -1)           // RightWall
             {
                 accum = 1;
                 GravityCollapse(accum);
             }
             if (state.IsKeyUp(Keys.C) && accum == 1)
-                accum = 0;
+                accum = -1;
 
-            if (state.IsKeyDown(Keys.Space) && accum == 0)      // Floor
+            if (state.IsKeyDown(Keys.Space) && accum == -1)       // Floor
             {
                 accum=2;
                 GravityCollapse(accum);
             }
             if (state.IsKeyUp(Keys.Space) && accum == 2)
-                accum=0;
+                accum=-1;
 
-            if (state.IsKeyDown(Keys.V) && accum == 0)          // LeftWall
+            if (state.IsKeyDown(Keys.V) && accum == -1)           // LeftWall
             {
                 accum = 3;
                 GravityCollapse(accum);
             }
             if (state.IsKeyUp(Keys.V) && accum == 3)
+                accum = -1;
+
+            if (state.IsKeyDown(Keys.Z) && accum == -1)           // Ground
+            {
                 accum = 0;
+                GravityCollapse(accum);
+            }
+            if (state.IsKeyUp(Keys.Z) && accum == 0)
+                accum = -1;
 
-            // END #############################################
+            // END ################################################
 
-            if (rightState)                                   // Right Acceleration
+            if (rightState)                                                                         // Right Acceleration
             {
                 if (LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2)
                 {
@@ -205,10 +249,13 @@ namespace CorridorGravity.GameLogic
                 }
                 else
                 {
-
+                    if (LEVEL_DIRECTION == 1)                // if InverseAxisDirections was applyed
+                        IncreaseVelocityRight();
+                    else
+                        IncreaseVelocityLeft();
                 }
             }
-            if (leftState)                                    // Left Acceleration
+            if (leftState)                                                                           // Left Acceleration
             {
                 if (LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2)
                 {
@@ -219,39 +266,60 @@ namespace CorridorGravity.GameLogic
                 }
                 else
                 {
-
+                    if (LEVEL_DIRECTION == 1)                // if InverseAxisDirections was applyed
+                        IncreaseVelocityLeft();
+                    else
+                        IncreaseVelocityRight();
                 }
             }
-            if (VelocityAxisX > 0.001f && IsGrounded() && rightState == false)      // Right SlowDown
+            if (IsGrounded() && rightState == false)                                                 // Right SlowDown
             {
                 if (LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2)
                 {
-                    if (LEVEL_DIRECTION == 1)
-                        SlowVelocityRight();
-                    else
-                        SlowVelocityLeft();
+                    if (VelocityAxisX > 0.001f)
+                    {
+                        if (LEVEL_DIRECTION == 1)
+                            SlowVelocityRight();
+                        else
+                            SlowVelocityLeft();
+                    }
                 }
                 else
                 {
-
+                    if (VelocityAxisY < -0.001f)
+                    {
+                        if (LEVEL_DIRECTION == 1)
+                            SlowVelocityRight();
+                        else
+                            SlowVelocityLeft();
+                    }
                 }
             }
-            else if (VelocityAxisX < -0.001f && IsGrounded() && leftState == false)     // Left SlowDown
+            if (IsGrounded() && leftState == false)                                            // Left SlowDown
             {
                 if (LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2)
                 {
-                    if (LEVEL_DIRECTION == 1)
-                        SlowVelocityLeft();
-                    else
-                        SlowVelocityRight();
+                    if (VelocityAxisX < -0.001f)
+                    {
+                        if (LEVEL_DIRECTION == 1)
+                            SlowVelocityLeft();
+                        else
+                            SlowVelocityRight();
+                    }
                 }
                 else
                 {
-
+                    if (VelocityAxisY > 0.001f)
+                    {
+                        if (LEVEL_DIRECTION == 1)
+                            SlowVelocityLeft();
+                        else
+                            SlowVelocityRight();
+                    }
                 }
             }
              
-            if ((state.IsKeyUp(Keys.Up) && state.IsKeyUp(Keys.W)) & DoubleJumpFlag > 1)         // Slow down after jump
+            if ((state.IsKeyUp(Keys.Up) && state.IsKeyUp(Keys.W)) & DoubleJumpFlag > 1)             // Slow down after jump
             {
                 switch (LEVEL_DIMENTION)
                 {
@@ -262,30 +330,30 @@ namespace CorridorGravity.GameLogic
                     default: break;
                 }
             } 
-            else if ((state.IsKeyDown(Keys.Up) || state.IsKeyDown(Keys.W)) & DoubleJumpFlag < 2)        // Jump power
+            else if ((state.IsKeyDown(Keys.Up) || state.IsKeyDown(Keys.W)) & DoubleJumpFlag < 2)    // Jump power
             {
-                DoubleJumpFlag++;
+                DoubleJumpFlag++ ;
                 switch(LEVEL_DIMENTION)                         // If jump key down & on the ground
                 {
                     case 0: VelocityAxisY = -JUMP_POWER;    break; 
-                    case 1:    break; 
+                    case 1: VelocityAxisX = -JUMP_POWER;    break;
                     case 2: VelocityAxisY = JUMP_POWER;     break; 
-                    case 3:    break; 
+                    case 3: VelocityAxisX = JUMP_POWER;     break;
                     default:                                break;
                 }
             }
-            if (!IsGrounded())
+            if (!IsGrounded())                                                                   // Gravity activater in air
             {
                 switch (LEVEL_DIMENTION)
                 {
-                    case 0: VelocityAxisY -= GRAVITY;    break; 
-                    case 1: break; 
-                    case 2:  VelocityAxisY += GRAVITY;   break; 
-                    case 3: break; 
-                    default: break;
+                    case 0: VelocityAxisY -= GRAVITY;       break;
+                    case 1: VelocityAxisX -= GRAVITY;       break;
+                    case 2: VelocityAxisY += GRAVITY;       break;
+                    case 3: VelocityAxisX += GRAVITY;       break;
+                    default:                                break;
                 }
-            }                        // In the air, then gravity keep going
-            else if(IsGrounded())
+            }
+            else if (IsGrounded())                                                             // On ground, failsave from 
             {
                 switch (LEVEL_DIMENTION)
                 {
@@ -293,16 +361,17 @@ namespace CorridorGravity.GameLogic
                         if (VelocityAxisY > 0)                     // If jump key down & on the ground
                             VelocityAxisY = 0;
                         break;
-
-                    case 1: //VelocityAxisY = -JUMP_POWER;
+                    case 1:
+                        if (VelocityAxisX > 0)                     // If jump key down & on the ground
+                            VelocityAxisX = 0;
                         break;
-
                     case 2:
                         if (VelocityAxisY < 0)                     // If jump key down & on the ground
                             VelocityAxisY = 0;
                         break;
-
-                    case 3: //VelocityAxisY = -JUMP_POWER;
+                    case 3:
+                        if (VelocityAxisX < 0)                     // If jump key down & on the ground
+                            VelocityAxisX = 0;
                         break;
 
                     default: break;
@@ -338,12 +407,24 @@ namespace CorridorGravity.GameLogic
         {
             if (VelocityAxisX != 0 || VelocityAxisY != 0)
             {
-                if (VelocityAxisY > 0)
-                    CurrentAnimation = SpriteBob.Jump;
-                else if (VelocityAxisY < 0)
-                    CurrentAnimation = SpriteBob.Jump;
-                else if (IsGrounded())
-                    CurrentAnimation = SpriteBob.Walk;
+                if (LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2)
+                {
+                    if (VelocityAxisY > 0)
+                        CurrentAnimation = SpriteBob.Jump;
+                    else if (VelocityAxisY < 0)
+                        CurrentAnimation = SpriteBob.Jump;
+                    else if (IsGrounded())
+                        CurrentAnimation = SpriteBob.Walk;
+                }
+                else
+                {
+                    if (VelocityAxisX > 0)
+                        CurrentAnimation = SpriteBob.Jump;
+                    else if (VelocityAxisX < 0)
+                        CurrentAnimation = SpriteBob.Jump;
+                    else if (IsGrounded())
+                        CurrentAnimation = SpriteBob.Walk;
+                }
             }
             else if(CurrentAnimation != SpriteBob.Idle)
             {
@@ -353,15 +434,23 @@ namespace CorridorGravity.GameLogic
 
         private void CoordinatesInFrameWall()                                   // Case dimention is one of the walls
         {
-            if (X < 0)                                          // X position fall out frame
+            if (X - EntityHeight < 0)                                          // X position fall out frame
             {
-                X = 0;
+                X = EntityHeight;
                 VelocityAxisX = 0;
             }
-            else if (X + EntityWidth > LEVEL_HEIGHT)
+            else if (X - LEVEL_OFFSET_HEIGHT > LEVEL_WIDTH)
             {
-                X = LEVEL_HEIGHT - EntityWidth;
-                VelocityAxisX = 0;
+                if (LEVEL_DIMENTION == 1)
+                {
+                    X = LEVEL_WIDTH - EntityWidth;
+                    VelocityAxisX = 0;
+                }
+                else
+                {
+                    X = LEVEL_WIDTH;
+                    VelocityAxisX = 0;
+                }
             }
 
             if (Y < 0)
@@ -369,9 +458,9 @@ namespace CorridorGravity.GameLogic
                 Y = 0;
                 VelocityAxisY = 0;
             }
-            else if (Y + EntityHeight >= LEVEL_WIDTH)          // Y position fall out frame
+            else if (Y + EntityWidth >= LEVEL_HEIGHT)          // Y position fall out frame
             {
-                Y = LEVEL_WIDTH - EntityHeight;         // Velocity = 0;
+                Y = LEVEL_HEIGHT - EntityWidth;         // Velocity = 0;
                 VelocityAxisY = 0;
             }
         }
@@ -416,7 +505,12 @@ namespace CorridorGravity.GameLogic
                     else return false;
 
                 case 1:
-                    return true;
+                    if (X + LEVEL_OFFSET_HEIGHT - offset * 2 >= LEVEL_WIDTH)
+                    {
+                        DoubleJumpFlag = 0;
+                        return true;
+                    }
+                    else return false;
 
                 case 2:
                     if (Y + offset <= LEVEL_OFFSET_HEIGHT)
@@ -427,7 +521,12 @@ namespace CorridorGravity.GameLogic
                     else return false;
 
                 case 3:
-                    return true;
+                    if (X + offset <= LEVEL_OFFSET_HEIGHT * 5)
+                    {
+                        DoubleJumpFlag = 0;
+                        return true;
+                    }
+                    else return false;
 
                 default: return true;
             }
@@ -445,36 +544,37 @@ namespace CorridorGravity.GameLogic
             LEVEL_DIRECTION = -LEVEL_DIRECTION;
         }
 
-        public void GravityCollapse(int cally)               // Changes the gravity and physics of the game, via one of four dimentions
+        public void GravityCollapse(int cally)                          // Changes the dimention (gravity and physics of the game)
         {
+            var prevDimention = LEVEL_DIMENTION;
+
             //var randomGravityDistortion = new Random().Next(1, 3);
 
-            var randomGravityDistortion = 2;
-
-            if (LEVEL_DIMENTION == 0)
-                randomGravityDistortion = 2;
-            else randomGravityDistortion = 0;
+            var randomGravityDistortion = cally;
 
             switch (randomGravityDistortion)
             {
                 case 0:
-
+                    //if (prevDimention == 1 || prevDimention == 3)
+                    //    SwapLevelDimentions();
                     LEVEL_DIMENTION = 0;
                     break;
 
                 case 1:
-                    SwapLevelDimentions();
+                    //if(prevDimention == 0 || prevDimention == 2)
+                    //    SwapLevelDimentions();
                     LEVEL_DIMENTION = 1;
                     break;
 
                 case 2:
-
+                   //if (prevDimention == 1 || prevDimention == 3)
+                   //    SwapLevelDimentions();
                     LEVEL_DIMENTION = 2;
                     break;
 
                 case 3:
-
-                    SwapLevelDimentions();
+                    //if (prevDimention == 0 || prevDimention == 2)
+                    //    SwapLevelDimentions(); 
                     LEVEL_DIMENTION = 3;
                     break;
 
