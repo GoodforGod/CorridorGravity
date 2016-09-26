@@ -8,17 +8,11 @@ namespace CorridorGravity.GameLogic
 {
     public abstract class Entity
     {
-        public Entity() { }
-
-        public Entity(ContentManager content) { }
-
-        public Entity(ContentManager content, string contentName) { }
-
         abstract public Texture2D EntitySprite { get; }
 
-        virtual public float X { get; set; }
+        public virtual float X { get; set; }
 
-        virtual public float Y { get; set; }
+        public virtual float Y { get; set; }
 
         public virtual void Init() { }
 

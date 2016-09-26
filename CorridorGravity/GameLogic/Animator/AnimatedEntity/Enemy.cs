@@ -5,12 +5,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CorridorGravity.GameLogic.AnimatedEntity
 {
-    class Bob : AnimationEntity
+    class Enemy : AnimationEntity
     {
         public const double INTERVAL_DEFAULT = .15;
         public const double INTERVAL_ATTACK = .25;
 
-        public Bob()
+        public Enemy()
         {
             Idle = new Animation();
             Walk = new Animation();
@@ -62,12 +62,10 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             StrikeOne.AddFrame(new Rectangle(51, 129, 50, 86), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             StrikeOne.AddFrame(new Rectangle(1, 129, 50, 86), TimeSpan.FromSeconds(INTERVAL_ATTACK));
 
-            // StrikeTwo first is Walk frame
-            //  First (48x84 start in 3x368)
+            // StrikeTwo First (48x84 start in 3x368)
             // Second (80x96 start in 57x357)
             // Third (54x112 start in 140x341)
             // Forth and fifth equal second and first
-            StrikeTwo.AddFrame(new Rectangle(3, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));  // First frame of walk anim
             StrikeTwo.AddFrame(new Rectangle(3, 368, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             StrikeTwo.AddFrame(new Rectangle(57, 357, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             StrikeTwo.AddFrame(new Rectangle(140, 341, 54, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));

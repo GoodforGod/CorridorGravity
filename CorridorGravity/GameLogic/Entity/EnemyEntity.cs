@@ -12,7 +12,7 @@ using CorridorGravity.GameLogic.AnimatedEntity;
 
 namespace CorridorGravity.GameLogic
 {
-    class PlayerEntity : Entity
+    class EnemyEntity : Entity
     {
         private static Color TintColor = Color.White;
 
@@ -51,20 +51,20 @@ namespace CorridorGravity.GameLogic
 
         private bool PLAYER_DIRECTION;      // Direction of animation, false - Animation direction right, true - left
 
-        public PlayerEntity(ContentManager content, int levelHeight, int levelWidth)
+        public EnemyEntity(ContentManager content, int levelHeight, int levelWidth)
         {
             EntitySprite = content.Load<Texture2D>("player-2-white-1");
             ConstractCommonParts(levelHeight, levelWidth);
         }
 
-        public PlayerEntity(ContentManager content, string contentName, int levelHeight, int levelWidth)
+        public EnemyEntity(ContentManager content, string contentName, int levelHeight, int levelWidth)
         {
             EntitySprite = content.Load<Texture2D>(contentName);
             ConstractCommonParts(levelHeight, levelWidth);
         }
-
+        
         private void ConstractCommonParts(int levelHeight, int levelWidth)
-        {
+        { 
             LEVEL_HEIGHT = levelHeight - LEVEL_OFFSET_HEIGHT;
             LEVEL_WIDTH = levelWidth;
         }
@@ -74,12 +74,12 @@ namespace CorridorGravity.GameLogic
             AnimationsPack = new Bob();
             CurrentAnimation = AnimationsPack.Idle;
             Y = -LEVEL_HEIGHT + 100;
-            X = LEVEL_WIDTH / 2;
+            X = LEVEL_WIDTH - 100;
         }
 
-        public int GetLevelDirection() { return LEVEL_DIRECTION; }
+        public void SetLevelDirection(int LEVEL_DIRECTION) { this.LEVEL_DIRECTION = LEVEL_DIRECTION; }
 
-        public int GetLevelDimention() { return LEVEL_DIMENTION; }
+        public void SetLevelDimention(int LEVEL_DIMENTION) { this.LEVEL_DIMENTION = LEVEL_DIMENTION; }
 
         private void IncreaseVelocityRight()                // If right key down & speed not max, then accelerate
         {
@@ -229,6 +229,7 @@ namespace CorridorGravity.GameLogic
             var rightState = false;
             var leftState = false;
 
+            /*
             KeyboardState state = Keyboard.GetState();
             //MouseState mouseState = Mouse.GetState();
 
@@ -276,7 +277,7 @@ namespace CorridorGravity.GameLogic
                 accum = -1;
 
             // END ################################################
-
+            */
             if (rightState)                                                                         // Right Acceleration
             {
                 if (LEVEL_DIRECTION == 1)                // if InverseAxisDirections was applyed
@@ -305,10 +306,9 @@ namespace CorridorGravity.GameLogic
                 else
                     SlowVelocityRight();
             }
-
-            if ((state.IsKeyUp(Keys.Up) && state.IsKeyUp(Keys.W)) & DoubleJumpFlag == 1)             // Slow down after jump
+            /*
+            if ((state.IsKeyUp(Keys.Up) && state.IsKeyUp(Keys.W)) & DoubleJumpFlag > 1)             // Slow down after jump
             {
-                DoubleJumpFlag = 2;
                 switch (LEVEL_DIMENTION)
                 {
                     case 0: break;
@@ -318,12 +318,9 @@ namespace CorridorGravity.GameLogic
                     default: break;
                 }
             }
-            else if ((state.IsKeyDown(Keys.Up) || state.IsKeyDown(Keys.W)) & (DoubleJumpFlag == 0 || DoubleJumpFlag == 2))    // Jump power
+            else if ((state.IsKeyDown(Keys.Up) || state.IsKeyDown(Keys.W)) & DoubleJumpFlag < 2)    // Jump power
             {
-                if (DoubleJumpFlag < 2)
-                    DoubleJumpFlag = 1;
-                else DoubleJumpFlag = 3;
-
+                DoubleJumpFlag = 1;
                 switch (LEVEL_DIMENTION)                         // If jump key down & on the ground
                 {
                     case 0: VelocityAxisY = -JUMP_POWER; break;
@@ -333,6 +330,7 @@ namespace CorridorGravity.GameLogic
                     default: break;
                 }
             }
+            */
             if (!IsGrounded())                                                                   // Gravity activater in air
             {
                 switch (LEVEL_DIMENTION)
@@ -376,11 +374,11 @@ namespace CorridorGravity.GameLogic
 
             switch (LEVEL_DIMENTION)                    // Restore player coordinates, if out of frame, depends on Dimention
             {
-                case 0: CoordinatesInFrameGround(); break;
-                case 1: CoordinatesInFrameWall(); break;
-                case 2: CoordinatesInFrameGround(); break;
-                case 3: CoordinatesInFrameWall(); break;
-                default: CoordinatesInFrameGround(); break;
+                case 0: CoordinatesInFrameGround();     break;
+                case 1: CoordinatesInFrameWall();       break;
+                case 2: CoordinatesInFrameGround();     break;
+                case 3: CoordinatesInFrameWall();       break;
+                default: CoordinatesInFrameGround();    break;
             }
         }
 
@@ -390,11 +388,11 @@ namespace CorridorGravity.GameLogic
             {
                 switch (SingleAnimationType)
                 {
-                    case 0: CurrentAnimation = AnimationsPack.StrikeOne; break;
-                    case 1: CurrentAnimation = AnimationsPack.StrikeTwo; break;
-                    case 2: CurrentAnimation = AnimationsPack.JumpStrike; break;
-                    case 3: CurrentAnimation = AnimationsPack.Celebrate; break;
-                    default: break;
+                    case 0: CurrentAnimation = AnimationsPack.StrikeOne;    break;
+                    case 1: CurrentAnimation = AnimationsPack.StrikeTwo;    break;
+                    case 2: CurrentAnimation = AnimationsPack.JumpStrike;   break;
+                    case 3: CurrentAnimation = AnimationsPack.Celebrate;    break;
+                    default:                                                break;
                 }
             }
             else if (VelocityAxisX != 0 || VelocityAxisY != 0)
@@ -604,4 +602,4 @@ namespace CorridorGravity.GameLogic
 
         }
     }
-} 
+}

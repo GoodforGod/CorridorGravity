@@ -18,6 +18,7 @@ namespace CorridorGravity
 
         private const string ENTITY_TYPE = "player-2-white-1";
 
+        EnemyEntity Enemy;
         PlayerEntity FirstCharacter;
         WorldEntity World;
 
@@ -46,6 +47,9 @@ namespace CorridorGravity
             
             FirstCharacter = new PlayerEntity(Content, ENTITY_TYPE, World.WORLD_HEIGHT, World.WORLD_WIDTH);
             FirstCharacter.Init();
+
+            Enemy = new EnemyEntity(Content, ENTITY_TYPE, World.WORLD_HEIGHT, World.WORLD_WIDTH);
+            Enemy.Init();
 
             base.Initialize();
         }
@@ -84,6 +88,9 @@ namespace CorridorGravity
 
             // Characters Updates
             FirstCharacter.Update(gameTime);
+            Enemy.SetLevelDimention(FirstCharacter.GetLevelDimention());
+            Enemy.SetLevelDirection(FirstCharacter.GetLevelDirection());
+            Enemy.Update(gameTime);
             
 
             base.Update(gameTime);
@@ -104,6 +111,9 @@ namespace CorridorGravity
 
             //Characters
             FirstCharacter.Draw(spriteBatch);
+
+            //
+            Enemy.Draw(spriteBatch);
 
             
             spriteBatch.End();

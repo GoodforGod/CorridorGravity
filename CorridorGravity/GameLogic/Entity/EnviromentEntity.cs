@@ -13,20 +13,30 @@ namespace CorridorGravity.GameLogic
 {
     class EnviromentEntity : Entity
     {
-        public override float X { get; set; }
-
+        public override float X { get; set; } 
         public override float Y { get; set; }
+
+        private int LEVEL_HEIGHT { get; set; }
+        private int LEVEL_WIDTH { get; set; }
 
         public override Texture2D EntitySprite { get; }
 
-        private EnviromentEntity(ContentManager content)
+        public EnviromentEntity(ContentManager content, int levelHeight, int levelWidth)
         {
-
+            EntitySprite = content.Load<Texture2D>("player-2-white-1");
+            ConstractCommonParts(levelHeight, levelWidth);
         }
 
-        private EnviromentEntity(ContentManager content, string contentName)
+        public EnviromentEntity(ContentManager content, string contentName, int levelHeight, int levelWidth)
         {
+            EntitySprite = content.Load<Texture2D>(contentName);
+            ConstractCommonParts(levelHeight, levelWidth);
+        }
 
+        private void ConstractCommonParts(int levelHeight, int levelWidth)
+        {
+            LEVEL_HEIGHT = levelHeight/2;
+            LEVEL_WIDTH = levelWidth/2;
         }
 
         public override void Init()

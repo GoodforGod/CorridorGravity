@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System; 
 using CorridorGravity.GameLogic.Animator;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Graphics; 
 
 namespace CorridorGravity.GameLogic.AnimatedEntity
 {
     class Alice : AnimationEntity
     {
         public const double INTERVAL = .15;
+        public const double INTERVAL_ATTACK = .25;
 
         public Alice()
         {

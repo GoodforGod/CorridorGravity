@@ -41,10 +41,12 @@
     <Compile Include="GameEngine.cs" />
     <Compile Include="GameLogic\Animator\AnimatedEntity\Alice.cs" />
     <Compile Include="GameLogic\Animator\AnimatedEntity\Bob.cs" />
+    <Compile Include="GameLogic\Animator\AnimatedEntity\Enemy.cs" />
     <Compile Include="GameLogic\Animator\Animation.cs" />
     <Compile Include="GameLogic\Animator\AnimationFrame.cs" />
     <Compile Include="GameLogic\Animator\AnimationEntity.cs" />
     <Compile Include="GameLogic\Controller.cs" />
+    <Compile Include="GameLogic\Entity\EnemyEntity.cs" />
     <Compile Include="GameLogic\Entity\Entity.cs" />
     <Compile Include="GameLogic\Entity\EnviromentEntity.cs" />
     <Compile Include="GameLogic\Entity\PlayerEntity.cs" />
