@@ -15,11 +15,16 @@ namespace CorridorGravity
 
         private const int FRAME_WIDTH = 1024;
         private const int FRAME_HEIGHT = 768;
+        private const int FRAME_SCORE_OFFSET = 40; 
 
-        private const string ENTITY_TYPE = "player-2-white-1";
+        private const string ENTITY_PLAYER = "player-2-white-1";
+        private const string ENTITY_WORLD = "world-background-score";
+        private const string ENTITY_ENEMY = "skeleton";
+        private const string ENTITY_BOSS = "magolor-soul-white";
+        private const string ENTITY_MAGIC = "magic-white";
 
-        EnemyEntity Enemy;
-        PlayerEntity FirstCharacter;
+        EnemyEntity EnemySkeleton;
+        PlayerEntity FirstPlayer;
         WorldEntity World;
 
         public GameEngine()
@@ -42,14 +47,14 @@ namespace CorridorGravity
             // TODO: Add your initialization logic here
             this.IsMouseVisible = true;
 
-            World = new WorldEntity(Content, "world-background", FRAME_WIDTH, FRAME_HEIGHT);
+            World = new WorldEntity(Content, ENTITY_WORLD, FRAME_WIDTH, FRAME_HEIGHT);
             World.Init();
             
-            FirstCharacter = new PlayerEntity(Content, ENTITY_TYPE, World.WORLD_HEIGHT, World.WORLD_WIDTH);
-            FirstCharacter.Init();
+            FirstPlayer = new PlayerEntity(Content, ENTITY_PLAYER, World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, World.WORLD_WIDTH);
+            FirstPlayer.Init();
 
-            Enemy = new EnemyEntity(Content, ENTITY_TYPE, World.WORLD_HEIGHT, World.WORLD_WIDTH);
-            Enemy.Init();
+            EnemySkeleton = new EnemyEntity(Content, ENTITY_ENEMY, World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, World.WORLD_WIDTH);
+            EnemySkeleton.Init();
 
             base.Initialize();
         }
@@ -87,10 +92,11 @@ namespace CorridorGravity
             // TODO: Add your update logic here
 
             // Characters Updates
-            FirstCharacter.Update(gameTime);
-            Enemy.SetLevelDimention(FirstCharacter.GetLevelDimention());
-            Enemy.SetLevelDirection(FirstCharacter.GetLevelDirection());
-            Enemy.Update(gameTime);
+            FirstPlayer.Update(gameTime);
+            EnemySkeleton.SetLevelDimention(FirstPlayer.GetLevelDimention());
+            EnemySkeleton.SetLevelDirection(FirstPlayer.GetLevelDirection());
+            EnemySkeleton.SetPlayerCoordinates(FirstPlayer.X, FirstPlayer.Y);
+            EnemySkeleton.Update(gameTime);
             
 
             base.Update(gameTime);
@@ -110,10 +116,10 @@ namespace CorridorGravity
             World.Draw(spriteBatch);
 
             //Characters
-            FirstCharacter.Draw(spriteBatch);
+            FirstPlayer.Draw(spriteBatch);
 
             //
-            Enemy.Draw(spriteBatch);
+            EnemySkeleton.Draw(spriteBatch);
 
             
             spriteBatch.End();

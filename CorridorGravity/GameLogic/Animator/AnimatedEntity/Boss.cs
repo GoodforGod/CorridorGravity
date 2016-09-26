@@ -1,16 +1,16 @@
-﻿using System; 
+﻿using System;
 using CorridorGravity.GameLogic.Animator;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics; 
+using Microsoft.Xna.Framework.Graphics;
 
 namespace CorridorGravity.GameLogic.AnimatedEntity
 {
-    class Bob : AnimationEntity
+    class Boss : AnimationEntity
     {
         public const double INTERVAL_DEFAULT = .15;
-        public const double INTERVAL_ATTACK = .15;
+        public const double INTERVAL_ATTACK = .25;
 
-        public Bob()
+        public Boss()
         {
             Idle = new Animation();
             Walk = new Animation();
@@ -22,16 +22,14 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             JumpStrike = new Animation();
             Celebrate = new Animation();
 
-            // Idle 192x84 (each 48x84) start in 6x15
-            Idle.AddFrame(new Rectangle(6, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Idle.AddFrame(new Rectangle(54, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Idle.AddFrame(new Rectangle(102, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Idle.AddFrame(new Rectangle(150, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Idle.AddFrame(new Rectangle(102, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Idle.AddFrame(new Rectangle(54, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            // Idle 192x84 (each 48x60) start in 212x99
+            Idle.AddFrame(new Rectangle(212, 99, 48, 60), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(276, 99, 48, 60), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(340, 99, 48, 60), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(404, 99, 48, 60), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
 
-            // Walk 240x82 (each 60x82) start in 3x239
-            Walk.AddFrame(new Rectangle(3, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            // Walk 240x82 (each 48x60) start in 212x99
+            Walk.AddFrame(new Rectangle(212, 99, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
             Walk.AddFrame(new Rectangle(50, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
             Walk.AddFrame(new Rectangle(99, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
             Walk.AddFrame(new Rectangle(149, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
@@ -62,12 +60,10 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             StrikeOne.AddFrame(new Rectangle(51, 129, 50, 86), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             StrikeOne.AddFrame(new Rectangle(1, 129, 50, 86), TimeSpan.FromSeconds(INTERVAL_ATTACK));
 
-            // StrikeTwo first is Walk frame
-            //  First (48x84 start in 3x368)
+            // StrikeTwo First (48x84 start in 3x368)
             // Second (80x96 start in 57x357)
             // Third (54x112 start in 140x341)
             // Forth and fifth equal second and first
-            StrikeTwo.AddFrame(new Rectangle(3, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));  // First frame of walk anim
             StrikeTwo.AddFrame(new Rectangle(3, 368, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             StrikeTwo.AddFrame(new Rectangle(57, 357, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             StrikeTwo.AddFrame(new Rectangle(140, 341, 54, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));

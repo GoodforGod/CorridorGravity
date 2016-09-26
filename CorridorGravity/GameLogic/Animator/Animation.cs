@@ -43,7 +43,7 @@ namespace CorridorGravity.GameLogic
 
             TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
 
-            if ((DateTime.Now - SingleAnimationStartTime).TotalMilliseconds > Duration.TotalMilliseconds) {
+            if ((DateTime.Now - SingleAnimationStartTime).TotalMilliseconds - Duration.TotalMilliseconds/100 > Duration.TotalMilliseconds) {
                 SingleAnimationCounter = 0;
                 TimeIntoAnimation = TimeSpan.FromSeconds(0);
                 return false;
