@@ -19,17 +19,18 @@ namespace CorridorGravity.GameLogic
         public override float X { get; set; }
         public override float Y { get; set; }
         public override Texture2D EntitySprite { get; }
-        private Animation CurrentAnimation { get; set; }
+        public Animation CurrentAnimation { get; set; }
         private Bob AnimationsPack;
         private bool SingleAnimationFlag;
         private int SingleAnimationType;
-        private int EntityHeight = 90;
-        private int EntityWidth = 44;
+
+        public const int EntityHeight = 90;
+        public const int EntityWidth = 44;
 
         private int DoubleJumpFlag = 0;
         private const float JUMP_POWER = 350f;
         private const float VELOCITY_AIR_LIMIT_X_AXIS = 40f;
-        private const float VELOCITY_LIMIT_X_AXIS = 260f;
+        private const float VELOCITY_LIMIT_X_AXIS = 235f;
         private const float VELOCITY_LIMIT_Y_AXIS = 180f;
         private const float ACCELERATION_AIR_X_AXIS = 3f;
         private const float ACCELERATION_X_AXIS = 85f;
@@ -41,7 +42,7 @@ namespace CorridorGravity.GameLogic
         private float VelocityAxisX = 0;
         private int accum = -1;
          
-        private bool ENTITY_DIRECTION;      // Direction of animation, false - Animation direction right, true - left
+        public bool ENTITY_DIRECTION { get; set; }      // Direction of animation, false - Animation direction right, true - left
         private int LEVEL_HEIGHT { get; set; }
         private int LEVEL_WIDTH { get; set; }
         private int LEVEL_OFFSET_HEIGHT = 20;
@@ -77,10 +78,14 @@ namespace CorridorGravity.GameLogic
             Y = -LEVEL_HEIGHT + 100;
             X = LEVEL_WIDTH / 2;
         }
+         
+        public int GetEntityWidth() { return EntityWidth; }
+
+        public int GetEntityHeight() { return EntityHeight; }
 
         public int GetLevelDirection() { return LEVEL_DIRECTION; }
 
-        public int GetLevelDimention() { return LEVEL_DIMENTION; }
+        public int GetLevelDimention() { return LEVEL_DIMENTION; } 
 
         private void IncreaseVelocityRight()                // If right key down & speed not max, then accelerate
         {

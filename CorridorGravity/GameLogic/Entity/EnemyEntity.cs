@@ -19,19 +19,18 @@ namespace CorridorGravity.GameLogic
         public override float X { get; set; }
         public override float Y { get; set; }
         public override Texture2D EntitySprite { get; }
-        private Animation CurrentAnimation { get; set; }
+        public Animation CurrentAnimation { get; set; }
         private Enemy AnimationsPack;
         private bool SingleAnimationFlag;
         private int SingleAnimationType;
 
-        private int EntityHeight = 72;
-        private int EntityWidth = 44;
-
+        public const int EntityHeight = 72;
+        public const int EntityWidth = 44;
          
         private int DistanseBetweenEntitis = 105;
         private const float JUMP_POWER = 450f;
         private const float VELOCITY_AIR_LIMIT_X_AXIS = 40f;
-        private const float VELOCITY_LIMIT_X_AXIS = 220f;
+        private const float VELOCITY_LIMIT_X_AXIS = 205f;
         private const float VELOCITY_LIMIT_Y_AXIS = 180f;
         private const float ACCELERATION_AIR_X_AXIS = 3f;
         private const float ACCELERATION_X_AXIS = 85f;
@@ -43,8 +42,8 @@ namespace CorridorGravity.GameLogic
 
         private float PlayerX { get; set; }
         private float PlayerY { get; set; } 
-        private bool EntityDirection;           // Direction of animation, false - Animation direction right, true - left
-        public bool EntityAlive { get; set; }
+        public bool EntityDirection { get; set; }           // Direction of animation, false - Animation direction right, true - left
+        public bool IsAlive { get; set; }
         
         private int LEVEL_HEIGHT { get; set; }
         private int LEVEL_WIDTH { get; set; }
@@ -55,32 +54,34 @@ namespace CorridorGravity.GameLogic
                                                 // 2 - Top=Ground,
                                                 // 3 - LeftWall=Ground.
 
-        public EnemyEntity(ContentManager content, int levelHeight, int levelWidth)
+        public EnemyEntity(ContentManager content, int levelHeight, int levelWidth, bool EntityDirection)
         {
             EntitySprite = content.Load<Texture2D>("skeleton");
-            ConstractCommonParts(levelHeight, levelWidth);
+            ConstractCommonParts(levelHeight, levelWidth, EntityDirection);
         }
 
-        public EnemyEntity(ContentManager content, string contentName, int levelHeight, int levelWidth)
+        public EnemyEntity(ContentManager content, string contentName, int levelHeight, int levelWidth, bool EntityDirection)
         {
             EntitySprite = content.Load<Texture2D>(contentName);
-            ConstractCommonParts(levelHeight, levelWidth);
+            ConstractCommonParts(levelHeight, levelWidth, EntityDirection);
         }
         
-        private void ConstractCommonParts(int levelHeight, int levelWidth)
+        private void ConstractCommonParts(int levelHeight, int levelWidth, bool EntityDirection)
         { 
             LEVEL_HEIGHT = levelHeight - LEVEL_OFFSET_HEIGHT;
             LEVEL_WIDTH = levelWidth;
-            EntityAlive = true;
-        }
 
-        public override void Init()
-        {
             AnimationsPack = new Enemy();
             CurrentAnimation = AnimationsPack.Idle;
             Y = -LEVEL_HEIGHT + 100;
             X = LEVEL_WIDTH - 100;
-        }
+            IsAlive = true;
+            this.EntityDirection = EntityDirection;
+        } 
+
+        public int GetEntityWidth() { return EntityWidth; }
+
+        public int GetEntityHeight() { return EntityHeight; }
 
         public void SetLevelDirection(int LEVEL_DIRECTION) { this.LEVEL_DIRECTION = LEVEL_DIRECTION; }
 
@@ -88,7 +89,7 @@ namespace CorridorGravity.GameLogic
 
         public void SetPlayerCoordinates(float X, float Y) { PlayerX = X; PlayerY = Y; }
 
-        private void IncreaseVelocityRight()                // If right key down & speed not max, then accelerate
+        private void IncreaseVelocityRight()                                // If right key down & speed not max, then accelerate
         {
             if (IsGrounded())
             {
@@ -127,7 +128,7 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        private void IncreaseVelocityLeft()                 // If left key down & speed not max, then accelerate
+        private void IncreaseVelocityLeft()                                 // If left key down & speed not max, then accelerate
         {
             if (IsGrounded())
             {
@@ -167,7 +168,7 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        private void SlowVelocityRight()                    //Slow down acceleration
+        private void SlowVelocityRight()                                        //Slow down acceleration
         {
             if ((LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2) && VelocityAxisX > SlowDownLimit)
             {
@@ -183,7 +184,7 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        private void SlowVelocityLeft()                     // Slow down acceleration
+        private void SlowVelocityLeft()                                         // Slow down acceleration
         {
             if ((LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2) && VelocityAxisX < -SlowDownLimit)
             {
@@ -219,7 +220,7 @@ namespace CorridorGravity.GameLogic
             else SingleAnimationType = AnimationType;
         }
 
-        private void UpdateVelocityBasedOnDirection()                          // Update velocity via input & check for gravity collapse
+        private void UpdateVelocityBasedOnDirection()                           // Update velocity via input & check for gravity collapse
         {
             var rightState = false;
             var leftState = false; 
@@ -521,7 +522,7 @@ namespace CorridorGravity.GameLogic
   
         public override void Update(GameTime gameTime)
         {
-            if (EntityAlive)
+            if (IsAlive)
             {
                 UpdateVelocityBasedOnDirection();
 

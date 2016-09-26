@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using CorridorGravity.GameLogic;
+using System.Collections.Generic;
 
 namespace CorridorGravity
 {
@@ -22,8 +23,16 @@ namespace CorridorGravity
         private const string ENTITY_ENEMY = "skeleton";
         private const string ENTITY_BOSS = "magolor-soul-white";
         private const string ENTITY_MAGIC = "magic-white";
+        private const string ENTITY_PILL = "pill-white";
 
-        EnemyEntity EnemySkeleton;
+        List<EnviromentEntity> EnvList;
+        List<EnemyEntity> EnemyList;
+        List<EnemyEntity> KillList;
+        // For now player one, soooooooo... Wait for multiplayer..
+
+        EnviromentEntity Pill_1;
+        EnviromentEntity Pill_2;
+         
         PlayerEntity FirstPlayer;
         WorldEntity World;
 
@@ -42,19 +51,52 @@ namespace CorridorGravity
         /// related content.  Calling base.Initialize will enumerate through any components
         /// and initialize them as well.
         /// </summary>
+        
+        private void InitWorld()
+        {
+            World = new WorldEntity(Content, ENTITY_WORLD, FRAME_WIDTH, FRAME_HEIGHT);
+            World.Init();
+        }
+        
+        private void InitEnviroment()
+        { 
+            Pill_1 = new EnviromentEntity(Content, ENTITY_PILL, FRAME_WIDTH, FRAME_HEIGHT);
+            Pill_2 = new EnviromentEntity(Content, ENTITY_PILL, FRAME_WIDTH, FRAME_HEIGHT);
+            Pill_1.Init(206, 268, true);
+            Pill_2.Init(562, 268, false);
+
+            EnvList.Add(Pill_1);
+            EnvList.Add(Pill_2);
+        }
+
+        private void InitCharacter()
+        {
+            FirstPlayer = new PlayerEntity(Content, ENTITY_PLAYER, World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, World.WORLD_WIDTH);
+            FirstPlayer.Init(); 
+        }
+
+        private void CreateEnemy()
+        {
+            EnemyList.Add(new EnemyEntity(Content, ENTITY_ENEMY, 
+                                                    World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, 
+                                                     World.WORLD_WIDTH, true));
+        }
+
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
             this.IsMouseVisible = true;
 
-            World = new WorldEntity(Content, ENTITY_WORLD, FRAME_WIDTH, FRAME_HEIGHT);
-            World.Init();
-            
-            FirstPlayer = new PlayerEntity(Content, ENTITY_PLAYER, World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, World.WORLD_WIDTH);
-            FirstPlayer.Init();
+            EnvList = new List<EnviromentEntity>();
+            EnemyList = new List<EnemyEntity>();
 
-            EnemySkeleton = new EnemyEntity(Content, ENTITY_ENEMY, World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, World.WORLD_WIDTH);
-            EnemySkeleton.Init();
+            InitWorld();
+
+            InitEnviroment();
+
+            InitCharacter();
+
+            CreateEnemy();
 
             base.Initialize();
         }
@@ -85,6 +127,56 @@ namespace CorridorGravity
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        /// 
+
+        private bool CheckOnTouch(Rectangle character, Rectangle enemy)
+        {
+            /*
+                         if (character.X < enemy.X + enemy.Width &&
+               character.X + character.Width > enemy.X &&
+               character.Y < enemy.Y + enemy.Height &&
+               character.Height + character.Y > enemy.Y)  // Collision
+               */
+            var enWidth = enemy.Width;
+            var enHeight = enemy.Height;
+            var chWidth = character.Width;
+            var chHeight = character.Height;
+
+            bool collisionX = (character.X + chWidth >= enemy.X) &&
+                (enemy.X + enWidth >= character.X);
+            // Collision y-axis?
+            bool collisionY = (character.Y + character.Height >= enemy.Y) &&
+                (enemy.Y + enemy.Height >= character.Y);
+            // Collision only if on both axes
+            return collisionX && collisionY;
+        }
+
+        private void CollideAllEntities()
+        {
+            foreach (var enemy in EnemyList)
+            {
+                if (enemy.IsAlive)
+                    enemy.IsAlive = !CheckOnTouch(new Rectangle((int)FirstPlayer.X, (int)FirstPlayer.Y,
+                                                        FirstPlayer.GetEntityWidth(), FirstPlayer.GetEntityHeight()),
+                                                  new Rectangle((int)enemy.X, (int)enemy.Y,
+                                                        enemy.GetEntityWidth(), enemy.GetEntityHeight()));
+                //else if(enemy.IsAlive) 
+                //    enemy.IsAlive = CheckOnTouch(enemy.CurrentAnimation.CurrentRectangle,
+                //                                        FirstPlayer.CurrentAnimation.CurrentRectangle);
+            }
+
+
+            foreach (var enemy in EnemyList)
+            {
+                if (!enemy.IsAlive)
+                {
+                    //EnemyList.Remove(enemy);
+                }
+                if (EnemyList.Capacity == 0)
+                    break;
+            }
+        }
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -93,10 +185,17 @@ namespace CorridorGravity
 
             // Characters Updates
             FirstPlayer.Update(gameTime);
-            EnemySkeleton.SetLevelDimention(FirstPlayer.GetLevelDimention());
-            EnemySkeleton.SetLevelDirection(FirstPlayer.GetLevelDirection());
-            EnemySkeleton.SetPlayerCoordinates(FirstPlayer.X, FirstPlayer.Y);
-            EnemySkeleton.Update(gameTime);
+
+            //Enemy Update 
+            foreach(var enemy in EnemyList)
+            {
+                enemy.SetLevelDimention(FirstPlayer.GetLevelDimention());
+                enemy.SetLevelDirection(FirstPlayer.GetLevelDirection());
+                enemy.SetPlayerCoordinates(FirstPlayer.X, FirstPlayer.Y);
+                enemy.Update(gameTime);
+            }
+
+            CollideAllEntities();
             
 
             base.Update(gameTime);
@@ -115,13 +214,18 @@ namespace CorridorGravity
             // Background
             World.Draw(spriteBatch);
 
+            //Enviroment
+            foreach (var env in EnvList)
+                env.Draw(spriteBatch);
+
             //Characters
             FirstPlayer.Draw(spriteBatch);
 
-            //
-            EnemySkeleton.Draw(spriteBatch);
+            //Enemies
+            foreach (var enemy in EnemyList)
+                enemy.Draw(spriteBatch);
 
-            
+
             spriteBatch.End();
             base.Draw(gameTime);
         }
