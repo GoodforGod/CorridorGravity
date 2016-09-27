@@ -49,9 +49,9 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             // Intro equal Celebrate
 
             // Dead 212x92 (each 73x92) start in 295x131
-            Dead.AddFrame(new Rectangle(295, 131, 73, 92), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Dead.AddFrame(new Rectangle(368, 131, 73, 92), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Dead.AddFrame(new Rectangle(441, 131, 73, 92), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Dead.AddFrame(new Rectangle(294, 133, 60, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Dead.AddFrame(new Rectangle(353, 129, 74, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Dead.AddFrame(new Rectangle(430, 130, 78, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
 
             // StrikeOne (first two 100x86, (each 50x86) start in 2x129), 
             // thrid (75x86 start in 107x130), 
@@ -67,12 +67,13 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             // Second (80x96 start in 57x357)
             // Third (54x112 start in 140x341)
             // Forth and fifth equal second and first
-            StrikeTwo.AddFrame(new Rectangle(3, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));  // First frame of walk anim
-            StrikeTwo.AddFrame(new Rectangle(3, 368, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeTwo.AddFrame(new Rectangle(57, 357, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeTwo.AddFrame(new Rectangle(140, 341, 54, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeTwo.AddFrame(new Rectangle(57, 357, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeTwo.AddFrame(new Rectangle(3, 368, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeTwo.AddFrame(new Rectangle(4, 105, 44, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));  // First frame of walk anim
+            StrikeTwo.AddFrame(new Rectangle(3, 341, 50, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeTwo.AddFrame(new Rectangle(58, 341, 80, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeTwo.AddFrame(new Rectangle(142, 341, 53, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeTwo.AddFrame(new Rectangle(58, 341, 80, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeTwo.AddFrame(new Rectangle(3, 341, 50, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeTwo.AddFrame(new Rectangle(4, 105, 44, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));  // First frame of walk anim
 
             // JumpStrike First (37x64 start in 342x398)
             // Second (60x64 start in 384x399)

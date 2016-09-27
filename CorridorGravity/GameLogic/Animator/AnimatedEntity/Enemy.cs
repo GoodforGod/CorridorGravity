@@ -50,7 +50,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             StrikeOne.AddFrame(new Rectangle(65, 170, 54, 68), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             StrikeOne.AddFrame(new Rectangle(0, 170, 54, 68), TimeSpan.FromSeconds(INTERVAL_ATTACK));
 
-            // StrikeTwo Firs
+            // StrikeTwo Firs 
 
             // JumpStrike equal StrikeOne
             JumpStrike.AddFrame(new Rectangle(0, 170, 54, 68), TimeSpan.FromSeconds(INTERVAL_ATTACK));

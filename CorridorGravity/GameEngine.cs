@@ -16,7 +16,8 @@ namespace CorridorGravity
 
         private const int FRAME_WIDTH = 1024;
         private const int FRAME_HEIGHT = 768;
-        private const int FRAME_SCORE_OFFSET = 40; 
+        private const int FRAME_SCORE_OFFSET = 40;
+        private bool GamePauseFlag { get; set; }
 
         private const string ENTITY_PLAYER = "player-2-white-1";
         private const string ENTITY_WORLD = "world-background-score";
@@ -89,6 +90,7 @@ namespace CorridorGravity
 
             EnvList = new List<EnviromentEntity>();
             EnemyList = new List<EnemyEntity>();
+            KillList = new List<EnemyEntity>();
 
             InitWorld();
 
@@ -156,10 +158,16 @@ namespace CorridorGravity
             foreach (var enemy in EnemyList)
             {
                 if (enemy.IsAlive)
-                    enemy.IsAlive = !CheckOnTouch(new Rectangle((int)FirstPlayer.X, (int)FirstPlayer.Y,
+                    if (CheckOnTouch(new Rectangle((int)FirstPlayer.X, (int)FirstPlayer.Y,
                                                         FirstPlayer.GetEntityWidth(), FirstPlayer.GetEntityHeight()),
                                                   new Rectangle((int)enemy.X, (int)enemy.Y,
-                                                        enemy.GetEntityWidth(), enemy.GetEntityHeight()));
+                                                        enemy.GetEntityWidth(), enemy.GetEntityHeight())))
+                    {
+                        if (FirstPlayer.GetPLayerStrikeStatus())
+                            enemy.IsAlive = false;
+                        else if (enemy.GetEnemyStrikeStatus() && FirstPlayer.EntityDirection == enemy.EntityDirection)
+                            FirstPlayer.IsAlive = true;
+                    }  
                 //else if(enemy.IsAlive) 
                 //    enemy.IsAlive = CheckOnTouch(enemy.CurrentAnimation.CurrentRectangle,
                 //                                        FirstPlayer.CurrentAnimation.CurrentRectangle);
@@ -168,13 +176,12 @@ namespace CorridorGravity
 
             foreach (var enemy in EnemyList)
             {
-                if (!enemy.IsAlive)
-                {
-                    //EnemyList.Remove(enemy);
-                }
-                if (EnemyList.Capacity == 0)
-                    break;
+                if (enemy.IsDead) 
+                    KillList.Add(enemy); 
             }
+
+            EnemyList.RemoveAll(e => KillList.Contains(e));
+            KillList.Clear();
         }
 
         protected override void Update(GameTime gameTime)
@@ -183,21 +190,30 @@ namespace CorridorGravity
                 Exit();
             // TODO: Add your update logic here
 
-            // Characters Updates
-            FirstPlayer.Update(gameTime);
+            // PauseCheck
+            if (Keyboard.GetState().IsKeyDown(Keys.P))
+                GamePauseFlag = !GamePauseFlag;
 
-            //Enemy Update 
-            foreach(var enemy in EnemyList)
+            if (!GamePauseFlag)
             {
-                enemy.SetLevelDimention(FirstPlayer.GetLevelDimention());
-                enemy.SetLevelDirection(FirstPlayer.GetLevelDirection());
-                enemy.SetPlayerCoordinates(FirstPlayer.X, FirstPlayer.Y);
-                enemy.Update(gameTime);
+                // Characters Updates
+                FirstPlayer.Update(gameTime);
+
+                //Enemy Update 
+                foreach (var enemy in EnemyList)
+                {
+                    if (!enemy.IsDead)
+                    {
+                        enemy.SetLevelDimention(FirstPlayer.GetLevelDimention());
+                        enemy.SetLevelDirection(FirstPlayer.GetLevelDirection());
+                        enemy.SetPlayerCoordinates(FirstPlayer.X, FirstPlayer.Y);
+                        enemy.Update(gameTime);
+                    }
+                }
+
+                CollideAllEntities();
+
             }
-
-            CollideAllEntities();
-            
-
             base.Update(gameTime);
         }
 
@@ -223,7 +239,8 @@ namespace CorridorGravity
 
             //Enemies
             foreach (var enemy in EnemyList)
-                enemy.Draw(spriteBatch);
+                if (!enemy.IsDead)
+                    enemy.Draw(spriteBatch);
 
 
             spriteBatch.End();

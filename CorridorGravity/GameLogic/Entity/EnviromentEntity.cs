@@ -105,7 +105,7 @@ namespace CorridorGravity.GameLogic
             batcher.Draw(EntitySprite, new Vector2(X, Y), new Rectangle(0, 0, EntitySprite.Width, EntitySprite.Height), TintColor,
                                         rotationAngle, new Vector2(1, 1), 0.5f, effectsApplyed, .0f);
 
-            Console.WriteLine(X + "|" + Y + "|" + EntitySprite.Width + "|" + EntitySprite.Height);
+            //Console.WriteLine(X + "|" + Y + "|" + EntitySprite.Width + "|" + EntitySprite.Height);
         }
 
         public override void Touch()

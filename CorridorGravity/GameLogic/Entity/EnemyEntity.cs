@@ -22,7 +22,7 @@ namespace CorridorGravity.GameLogic
         public Animation CurrentAnimation { get; set; }
         private Enemy AnimationsPack;
         private bool SingleAnimationFlag;
-        private int SingleAnimationType;
+        private int SingleAnimationType = -1;
 
         public const int EntityHeight = 72;
         public const int EntityWidth = 44;
@@ -44,6 +44,7 @@ namespace CorridorGravity.GameLogic
         private float PlayerY { get; set; } 
         public bool EntityDirection { get; set; }           // Direction of animation, false - Animation direction right, true - left
         public bool IsAlive { get; set; }
+        public bool IsDead { get; set; }
         
         private int LEVEL_HEIGHT { get; set; }
         private int LEVEL_WIDTH { get; set; }
@@ -77,7 +78,14 @@ namespace CorridorGravity.GameLogic
             X = LEVEL_WIDTH - 100;
             IsAlive = true;
             this.EntityDirection = EntityDirection;
-        } 
+        }
+
+        public bool GetEnemyStrikeStatus()
+        {
+            if (SingleAnimationType == 0 || SingleAnimationType == 2)
+                return true;
+            else return false;
+        }
 
         public int GetEntityWidth() { return EntityWidth; }
 
@@ -200,7 +208,7 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        private void SetSingleAnimationType(int AnimationType)
+        private void SetAirAnimationType(int AnimationType)
         {
             var dimentionVelocity = 0f;
             SingleAnimationFlag = true;
@@ -226,9 +234,10 @@ namespace CorridorGravity.GameLogic
             var leftState = false; 
             var between = 0f;
 
-            if (EntityDirection) 
+            if (EntityDirection)
                 rightState = true; 
-            else leftState = true;
+            else
+                leftState = true;
 
             if (!SingleAnimationFlag)
             {
@@ -253,7 +262,7 @@ namespace CorridorGravity.GameLogic
                             case 3: VelocityAxisX += VELOCITY_LIMIT_X_AXIS;  break;
                             default:                                         break;
                         }
-                        SetSingleAnimationType(0); 
+                        SetAirAnimationType(0); 
                     }
                 }
                 else if (between < 0 && between > -DistanseBetweenEntitis)
@@ -266,7 +275,7 @@ namespace CorridorGravity.GameLogic
                         case 3: VelocityAxisX += VELOCITY_LIMIT_X_AXIS; break;
                         default: break;
                     }
-                    SetSingleAnimationType(0); 
+                    SetAirAnimationType(0); 
                 }
             }
 
@@ -405,10 +414,10 @@ namespace CorridorGravity.GameLogic
             {
                 switch (SingleAnimationType)
                 {
-                    case 0: CurrentAnimation = AnimationsPack.StrikeOne;    break;
-                    case 1: CurrentAnimation = AnimationsPack.StrikeTwo;    break;
+                    case 0: CurrentAnimation = AnimationsPack.StrikeOne;    break; 
                     case 2: CurrentAnimation = AnimationsPack.JumpStrike;   break;
                     case 3: CurrentAnimation = AnimationsPack.Celebrate;    break;
+                    case 4: CurrentAnimation = AnimationsPack.Dead;         break;
                     default:                                                break;
                 }
             }
@@ -508,7 +517,7 @@ namespace CorridorGravity.GameLogic
                     else return false;
 
                 case 3:
-                    if (X + offset <= LEVEL_OFFSET_HEIGHT * 5) 
+                    if (X + offset <= LEVEL_OFFSET_HEIGHT * 4) 
                         return true; 
                     else return false; 
                 default: return true;
@@ -519,7 +528,7 @@ namespace CorridorGravity.GameLogic
         {
             LEVEL_DIRECTION = -LEVEL_DIRECTION;
         }
-  
+
         public override void Update(GameTime gameTime)
         {
             if (IsAlive)
@@ -527,14 +536,25 @@ namespace CorridorGravity.GameLogic
                 UpdateVelocityBasedOnDirection();
 
                 UpdateCoordinatesBasedOnVelocity(gameTime);
-
-                UpdateAnimationBasedOnVelocity();
-
-                if (!SingleAnimationFlag)
-                    CurrentAnimation.UpdateCycleAnimation(gameTime);
-                else
-                    SingleAnimationFlag = CurrentAnimation.UpdateSingleAnimation(gameTime);
             }
+            else if (SingleAnimationType != 4)
+            {
+                SingleAnimationFlag = true;
+                SingleAnimationType = 4;
+            }
+            else IsDead = true;
+
+            UpdateAnimationBasedOnVelocity();
+
+            if (!SingleAnimationFlag)
+                CurrentAnimation.UpdateCycleAnimation(gameTime);
+            else
+            {
+                SingleAnimationFlag = CurrentAnimation.UpdateSingleAnimation(gameTime);
+                if (!SingleAnimationFlag)
+                    SingleAnimationType = -1;
+            }
+
         }
 
         public override void Draw(SpriteBatch batcher)
@@ -575,9 +595,33 @@ namespace CorridorGravity.GameLogic
 
                 default: break;
             }
+            /*
+            if(!IsAlive && !CoordinatesAreCorrected)
+            {
+                switch (LEVEL_DIMENTION)
+                {
+                    case 0: Y = LEVEL_HEIGHT - LEVEL_OFFSET_HEIGHT * 3;   break;
+                    case 1: X = LEVEL_WIDTH - LEVEL_OFFSET_HEIGHT/2;      break;
+                    case 2: Y = LEVEL_OFFSET_HEIGHT/2;                    break;
+                    case 3: X = LEVEL_OFFSET_HEIGHT*3;                    break;
+                    default:                                              break;
+                }
+                CoordinatesAreCorrected = true;
+            }
 
-            batcher.Draw(EntitySprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, TintColor,
-                                        rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
+            if (!SingleAnimationFlag && !IsAlive)
+                batcher.Draw(EntitySprite, new Vector2(X, Y), new Rectangle(285, 403, 68, 68), TintColor,
+                                            rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
+            else 
+            */
+            if (IsDead) 
+                batcher.Draw(EntitySprite, new Vector2(X, Y), new Rectangle(0, 0, 1, 1), TintColor); 
+            else if (SingleAnimationType == 4) 
+                batcher.Draw(EntitySprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, TintColor,
+                                            rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f); 
+            else if (IsAlive)
+                batcher.Draw(EntitySprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, TintColor,
+                                            rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f); 
         }
 
         public override void Touch()
