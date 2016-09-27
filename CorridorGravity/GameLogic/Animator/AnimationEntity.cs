@@ -28,5 +28,9 @@ namespace CorridorGravity.GameLogic.Animator
         public abstract Animation JumpStrike { get; }
 
         public abstract Animation Celebrate { get; }
+
+        public abstract Animation Portrait { get; }
+
+        public abstract Animation Health { get; }
     }
 }

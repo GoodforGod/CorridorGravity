@@ -25,11 +25,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             // Idle (each 48x60) start in 212x99 
             Idle.AddFrame(new Rectangle(122, 418, 42, 64), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
             Idle.AddFrame(new Rectangle(66, 416, 42, 64), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Idle.AddFrame(new Rectangle(122, 418, 42, 64), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            //Idle.AddFrame(new Rectangle(212, 94, 50, 66), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            //Idle.AddFrame(new Rectangle(272, 94, 50, 66), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            //Idle.AddFrame(new Rectangle(332, 94, 50, 66), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            //Idle.AddFrame(new Rectangle(396, 94, 50, 66), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(122, 418, 42, 64), TimeSpan.FromSeconds(INTERVAL_DEFAULT)); 
 
             // Walk (each 42x62) start in 9x338
             Walk.AddFrame(new Rectangle(9, 338, 42, 62), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
@@ -80,5 +76,9 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
         public override Animation JumpStrike { get; }
 
         public override Animation Celebrate { get; }
+
+        public override Animation Portrait { get; }
+
+        public override Animation Health { get; }
     }
 }

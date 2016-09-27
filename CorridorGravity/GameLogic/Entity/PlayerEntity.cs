@@ -19,11 +19,10 @@ namespace CorridorGravity.GameLogic
         public override float X { get; set; }
         public override float Y { get; set; }
         public override Texture2D EntitySprite { get; }
-        public Animation CurrentAnimation { get; set; }
+        public Animation CurrentAnimation { get; set; } 
         private Bob AnimationsPack;
-        private Rectangle DeadEntityFrame = new Rectangle();
-        private bool SingleAnimationFlag;
-        private int SingleAnimationType = -1;
+        private int OnceAnimationType = -1;
+        private bool IsOnceAnimated;
 
         public const int EntityHeight = 90;
         public const int EntityWidth = 44;
@@ -37,22 +36,25 @@ namespace CorridorGravity.GameLogic
         private const float ACCELERATION_X_AXIS = 85f;
         private const float GRAVITY = -9.8f;
 
+        public long ScoreCount { get; set; }
+        public int HealthCount { get; set; }
         public bool IsAlive { get; set; }
         public bool IsDead { get; set; }
+
         private float SlowDownLimit = 0.001f;
         private float VelocityAxisY = 0;
         private float VelocityAxisX = 0;
         private int accum = -1;
          
-        public bool EntityDirection { get; set; }      // Direction of animation, false - Animation direction right, true - left
+        public bool EntityDirection { get; set; }   // Direction of animation, false - Animation direction right, true - left
         private int LEVEL_HEIGHT { get; set; }
         private int LEVEL_WIDTH { get; set; }
         private int LEVEL_OFFSET_HEIGHT = 20;
-        private int LEVEL_DIRECTION = 1;    // 1 - Correct direction, -1 - inverse
-        private int LEVEL_DIMENTION = 0;    // 0 - Ground=Ground, 
-                                            // 1 - RightWall=Ground, 
-                                            // 2 - Top=Ground,
-                                            // 3 - LeftWall=Ground. 
+        public int LEVEL_DIRECTION { get; set; }    // 1 - Correct direction, -1 - inverse
+        public int LEVEL_DIMENTION { get; set; }    // 0 - Ground=Ground, 
+                                                    // 1 - RightWall=Ground, 
+                                                    // 2 - Top=Ground,
+                                                    // 3 - LeftWall=Ground. 
 
         public PlayerEntity(ContentManager content, int levelHeight, int levelWidth)
         {
@@ -69,21 +71,30 @@ namespace CorridorGravity.GameLogic
         private void ConstractCommonParts(int levelHeight, int levelWidth)
         {
             LEVEL_HEIGHT = levelHeight - LEVEL_OFFSET_HEIGHT;
-            LEVEL_WIDTH = levelWidth; 
+            LEVEL_WIDTH = levelWidth;
+            LEVEL_DIRECTION = 1;
+            LEVEL_DIMENTION = 0;
+
+            Y = LEVEL_HEIGHT - EntityHeight - 1;
+            X = LEVEL_WIDTH / 2;
+            ScoreCount = 0;
+            HealthCount = 6;
+            IsAlive = true;
+
+            AnimationsPack = new Bob();
+            CurrentAnimation = AnimationsPack.Celebrate;
+            OnceAnimationType = 3;
+            IsOnceAnimated = true;
         }
 
         public override void Init()
-        {
-            AnimationsPack = new Bob();
-            CurrentAnimation = AnimationsPack.Idle;
-            Y = -LEVEL_HEIGHT + 100;
-            X = LEVEL_WIDTH / 2;
-            IsAlive = true;
+        { 
+
         }
          
         public bool GetPLayerStrikeStatus()
         {
-            if (SingleAnimationType == 0 || SingleAnimationType == 1 || SingleAnimationType == 2)
+            if (OnceAnimationType == 0 || OnceAnimationType == 1 || OnceAnimationType == 2)
                 return true;
             else return false;
         }
@@ -97,10 +108,6 @@ namespace CorridorGravity.GameLogic
         {
             return CurrentAnimation.CurrentRectangle.Height;
         }
-
-        public int GetLevelDirection() { return LEVEL_DIRECTION; }
-
-        public int GetLevelDimention() { return LEVEL_DIMENTION; } 
 
         private void IncreaseVelocityRight()                // If right key down & speed not max, then accelerate
         {
@@ -228,7 +235,7 @@ namespace CorridorGravity.GameLogic
         private void SetAirAnimationType(int AnimationType)
         {
             var dimentionVelocity = 0f;
-            SingleAnimationFlag = true;
+            IsOnceAnimated = true;
 
             switch (LEVEL_DIMENTION)
             {
@@ -239,10 +246,10 @@ namespace CorridorGravity.GameLogic
                 default: break;
             }
             if (dimentionVelocity < 0)
-                SingleAnimationType = 2;
+                OnceAnimationType = 2;
             else if (!IsGrounded())
-                SingleAnimationType = 2;
-            else SingleAnimationType = AnimationType;
+                OnceAnimationType = 2;
+            else OnceAnimationType = AnimationType;
         }
 
         private void UpdateVelocityBasedOnInput()              // Update velocity via input & check for gravity collapse
@@ -257,9 +264,9 @@ namespace CorridorGravity.GameLogic
                 rightState = true;
             if (state.IsKeyDown(Keys.Left) || state.IsKeyDown(Keys.A) && IsAlive)
                 leftState = true;
-            if (state.IsKeyDown(Keys.Q) && !SingleAnimationFlag && IsAlive)
+            if (state.IsKeyDown(Keys.Q) && !IsOnceAnimated && IsAlive)
                 SetAirAnimationType(0);
-            if (state.IsKeyDown(Keys.E) && !SingleAnimationFlag && IsAlive)
+            if (state.IsKeyDown(Keys.E) && !IsOnceAnimated && IsAlive)
                 SetAirAnimationType(1);
 
             // Test code section BEGIN ############################
@@ -298,14 +305,14 @@ namespace CorridorGravity.GameLogic
 
             // END ################################################
 
-            if (rightState)                                                                         // Right Acceleration
+            if (rightState && IsAlive)                                                                         // Right Acceleration
             {
                 if (LEVEL_DIRECTION == 1)                // if InverseAxisDirections was applyed
                     IncreaseVelocityRight();
                 else
                     IncreaseVelocityLeft();
             }
-            if (leftState)                                                                          // Left Acceleration
+            if (leftState && IsAlive)                                                                          // Left Acceleration
             {
                 if (LEVEL_DIRECTION == 1)                // if InverseAxisDirections was applyed
                     IncreaseVelocityLeft();
@@ -419,9 +426,9 @@ namespace CorridorGravity.GameLogic
 
         private void UpdateAnimationBasedOnVelocity()                           // Update current animation
         {
-            if (SingleAnimationFlag)
+            if (IsOnceAnimated)
             {
-                switch (SingleAnimationType)
+                switch (OnceAnimationType)
                 {
                     case 0: CurrentAnimation = AnimationsPack.StrikeOne;    break;
                     case 1: CurrentAnimation = AnimationsPack.StrikeTwo;    break;
@@ -570,27 +577,30 @@ namespace CorridorGravity.GameLogic
 
         public override void Update(GameTime gameTime)
         {
+            if (HealthCount < 1)
+                IsAlive = false;
+
             UpdateVelocityBasedOnInput();
 
             UpdateCoordinatesBasedOnVelocity(gameTime);
 
             if(!IsAlive)
             {
-                SingleAnimationFlag = true;
-                SingleAnimationType = 4;
+                IsOnceAnimated = true;
+                OnceAnimationType = 4;
             } 
 
             UpdateAnimationBasedOnVelocity();
 
-            if (!SingleAnimationFlag && IsAlive)
+            if (!IsOnceAnimated && IsAlive)
                 CurrentAnimation.UpdateCycleAnimation(gameTime);
             else
             { 
                 if (!IsDead)
-                    SingleAnimationFlag = CurrentAnimation.UpdateSingleAnimation(gameTime);
-                if (!SingleAnimationFlag)
-                    SingleAnimationType = -1;
-                if (!IsAlive && SingleAnimationType == -1) 
+                    IsOnceAnimated = CurrentAnimation.UpdateSingleAnimationIsEnded(gameTime);
+                if (!IsOnceAnimated)
+                    OnceAnimationType = -1;
+                if (!IsAlive && OnceAnimationType == -1) 
                     IsDead = true; 
             }
         }
@@ -654,7 +664,20 @@ namespace CorridorGravity.GameLogic
                 }
                 batcher.Draw(EntitySprite, new Vector2(StrikeX, StrikeY), CurrentAnimation.CurrentRectangle, TintColor,
                                             rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
-            } 
+            }
+            // Portrait draw
+            batcher.Draw(EntitySprite, new Vector2(LEVEL_WIDTH - 38, LEVEL_HEIGHT - 40), AnimationsPack.Portrait.CurrentRectangle, Color.Beige,
+                            rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
+
+            var axisStepX = 20;
+
+            for(int i = 0; i < HealthCount; i++)
+            { 
+                batcher.Draw(EntitySprite, new Vector2(axisStepX, LEVEL_HEIGHT), AnimationsPack.Health.CurrentRectangle, Color.Beige,
+                 rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
+                axisStepX += 44;
+            }
+
         }
 
         public override void Touch()

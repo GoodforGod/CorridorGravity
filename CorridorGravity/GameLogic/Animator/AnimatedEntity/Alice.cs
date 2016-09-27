@@ -21,6 +21,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             StrikeTwo = new Animation();
             JumpStrike = new Animation();
             Celebrate = new Animation();
+            Portrait = new Animation();
 
             // Idle
             Idle.AddFrame(new Rectangle(48, 0, 16, 16), TimeSpan.FromSeconds(INTERVAL));
@@ -96,5 +97,9 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
         public override Animation JumpStrike { get; }
 
         public override Animation Celebrate { get; }
+
+        public override Animation Portrait { get; }
+
+        public override Animation Health { get; }
     }
 }

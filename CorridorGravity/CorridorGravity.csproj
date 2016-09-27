@@ -43,6 +43,7 @@
     <Compile Include="GameLogic\Animator\AnimatedEntity\Bob.cs" />
     <Compile Include="GameLogic\Animator\AnimatedEntity\Boss.cs" />
     <Compile Include="GameLogic\Animator\AnimatedEntity\Enemy.cs" />
+    <Compile Include="GameLogic\Animator\AnimatedEntity\Magic.cs" />
     <Compile Include="GameLogic\Animator\Animation.cs" />
     <Compile Include="GameLogic\Animator\AnimationFrame.cs" />
     <Compile Include="GameLogic\Animator\AnimationEntity.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="GameLogic\Entity\EnemyEntity.cs" />
     <Compile Include="GameLogic\Entity\Entity.cs" />
     <Compile Include="GameLogic\Entity\EnviromentEntity.cs" />
+    <Compile Include="GameLogic\Entity\MagicEntity.cs" />
     <Compile Include="GameLogic\Entity\PlayerEntity.cs" />
     <Compile Include="GameLogic\Entity\WorldEntity.cs" />
     <Compile Include="Program.cs" />

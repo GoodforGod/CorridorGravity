@@ -14,7 +14,7 @@ namespace CorridorGravity.GameLogic
         private int SingleAnimationCounter = 0;
         private DateTime SingleAnimationStartTime;
 
-        TimeSpan Duration {
+         public TimeSpan Duration {
             get {
                 double totalSeconds = 0;
                 foreach (var frame in FrameList)
@@ -30,7 +30,32 @@ namespace CorridorGravity.GameLogic
             });
         }
 
-        public bool UpdateSingleAnimation(GameTime gameTime)
+        public double UpdateSingleAnimationTimeSlapsed(GameTime gameTime)
+        {
+            if (SingleAnimationCounter == 0)
+            {
+                SingleAnimationStartTime = DateTime.Now;
+                SingleAnimationCounter = 1;
+            }
+            double secondsIntoAnimation =
+                TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
+
+            double remainder = secondsIntoAnimation % Duration.TotalSeconds;
+
+            TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
+
+            var TimeElapsed = (DateTime.Now - SingleAnimationStartTime).TotalMilliseconds - Duration.TotalMilliseconds / 100;
+
+            if (TimeElapsed > Duration.TotalMilliseconds)
+            {
+                SingleAnimationCounter = 0;
+                TimeIntoAnimation = TimeSpan.FromSeconds(0);
+                return -1;
+            }
+            else return TimeElapsed;
+        }
+
+        public bool UpdateSingleAnimationIsEnded(GameTime gameTime)
         {
             if (SingleAnimationCounter == 0) {
                 SingleAnimationStartTime = DateTime.Now;

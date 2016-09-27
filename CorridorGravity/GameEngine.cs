@@ -17,7 +17,10 @@ namespace CorridorGravity
         private const int FRAME_WIDTH = 1024;
         private const int FRAME_HEIGHT = 768;
         private const int FRAME_SCORE_OFFSET = 40;
-        private bool GamePauseFlag { get; set; }
+        private bool IsPaused { get; set; }
+        private bool ButtonFlag { get; set; }
+
+        private int SpawnTime = 16;
 
         private const string ENTITY_PLAYER = "player-2-white-1";
         private const string ENTITY_WORLD = "world-background-score";
@@ -26,9 +29,11 @@ namespace CorridorGravity
         private const string ENTITY_MAGIC = "magic-white";
         private const string ENTITY_PILL = "pill-white";
 
+        List<MagicEntity> MagicList;
         List<EnviromentEntity> EnvList;
         List<EnemyEntity> EnemyList;
         List<EnemyEntity> KillList;
+
         // For now player one, soooooooo... Wait for multiplayer..
 
         EnviromentEntity Pill_1;
@@ -57,6 +62,10 @@ namespace CorridorGravity
         {
             World = new WorldEntity(Content, ENTITY_WORLD, FRAME_WIDTH, FRAME_HEIGHT);
             World.Init();
+
+            MagicEntity Magic_1 = new MagicEntity(Content, ENTITY_MAGIC, FRAME_HEIGHT, FRAME_WIDTH);
+            Magic_1.UpdateAnimationBasedOnBoss(206, 188, 0);
+            MagicList.Add(Magic_1);
         }
         
         private void InitEnviroment()
@@ -76,11 +85,9 @@ namespace CorridorGravity
             FirstPlayer.Init(); 
         }
 
-        private void CreateEnemy()
+        private void CreateEnemy(float X, float Y, bool direction)
         {
-            EnemyList.Add(new EnemyEntity(Content, ENTITY_ENEMY, 
-                                                    World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, 
-                                                     World.WORLD_WIDTH, true));
+            EnemyList.Add(new EnemyEntity(Content, ENTITY_ENEMY, World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, World.WORLD_WIDTH, direction, X, Y));
         }
 
         protected override void Initialize()
@@ -88,6 +95,7 @@ namespace CorridorGravity
             // TODO: Add your initialization logic here
             this.IsMouseVisible = true;
 
+            MagicList = new List<MagicEntity>();
             EnvList = new List<EnviromentEntity>();
             EnemyList = new List<EnemyEntity>();
             KillList = new List<EnemyEntity>();
@@ -98,7 +106,7 @@ namespace CorridorGravity
 
             InitCharacter();
 
-            CreateEnemy();
+            CreateEnemy(World.WORLD_HEIGHT/2, World.WORLD_WIDTH/2, true);
 
             base.Initialize();
         }
@@ -132,30 +140,19 @@ namespace CorridorGravity
         /// 
 
         private bool CheckOnTouch(Rectangle character, Rectangle enemy)
-        {
-            /*
-                         if (character.X < enemy.X + enemy.Width &&
-               character.X + character.Width > enemy.X &&
-               character.Y < enemy.Y + enemy.Height &&
-               character.Height + character.Y > enemy.Y)  // Collision
-               */
-            var enWidth = enemy.Width;
-            var enHeight = enemy.Height;
-            var chWidth = character.Width;
-            var chHeight = character.Height;
+        {  
+            bool collisionX = (character.X + character.Width >= enemy.X) &&             // X axis
+                (enemy.X + enemy.Width >= character.X);
 
-            bool collisionX = (character.X + chWidth >= enemy.X) &&
-                (enemy.X + enWidth >= character.X);
-            // Collision y-axis?
-            bool collisionY = (character.Y + character.Height >= enemy.Y) &&
+            bool collisionY = (character.Y + character.Height >= enemy.Y) &&    // Y axis    
                 (enemy.Y + enemy.Height >= character.Y);
-            // Collision only if on both axes
+
             return collisionX && collisionY;
         }
 
         private void CollideAllEntities()
         {
-            foreach (var enemy in EnemyList)
+            foreach (var enemy in EnemyList)                // Check collision and take actions
             {
                 if (enemy.IsAlive)
                     if (CheckOnTouch(new Rectangle((int)FirstPlayer.X, (int)FirstPlayer.Y,
@@ -166,15 +163,20 @@ namespace CorridorGravity
                         if (FirstPlayer.GetPLayerStrikeStatus())
                             enemy.IsAlive = false;
                         else if (enemy.GetEnemyStrikeStatus() && FirstPlayer.EntityDirection == enemy.EntityDirection)
-                            FirstPlayer.IsAlive = true;
-                    }  
-                //else if(enemy.IsAlive) 
-                //    enemy.IsAlive = CheckOnTouch(enemy.CurrentAnimation.CurrentRectangle,
-                //                                        FirstPlayer.CurrentAnimation.CurrentRectangle);
+                        {
+                            if (!enemy.IsAttacked && FirstPlayer.IsAlive)
+                            {
+                                enemy.IsAttacked = true;
+                                FirstPlayer.HealthCount--;
+                            }
+                        }
+                    }
+                    else
+                        enemy.IsAttacked = false; 
             }
 
 
-            foreach (var enemy in EnemyList)
+            foreach (var enemy in EnemyList)                    // Clean dead entities
             {
                 if (enemy.IsDead) 
                     KillList.Add(enemy); 
@@ -188,13 +190,29 @@ namespace CorridorGravity
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            // TODO: Add your update logic here
 
-            // PauseCheck
-            if (Keyboard.GetState().IsKeyDown(Keys.P))
-                GamePauseFlag = !GamePauseFlag;
+            // Check for pause input  
+            if (Keyboard.GetState().IsKeyDown(Keys.P) && ButtonFlag)
+            {
+                ButtonFlag = false;
+                IsPaused = !IsPaused;
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.P))
+                ButtonFlag = true;
 
-            if (!GamePauseFlag)
+            // Magic Updates
+            foreach(var magic in MagicList)
+            {
+                magic.Update(gameTime);
+                if(magic.IsReadyToSpawn && !magic.IsSpawned)
+                {
+                    magic.IsSpawned = true;
+                    CreateEnemy(magic.X - 30, magic.Y + 20, true);
+                }
+            }
+
+            // If not paused
+            if (!IsPaused)
             {
                 // Characters Updates
                 FirstPlayer.Update(gameTime);
@@ -204,12 +222,12 @@ namespace CorridorGravity
                 {
                     if (!enemy.IsDead)
                     {
-                        enemy.SetLevelDimention(FirstPlayer.GetLevelDimention());
-                        enemy.SetLevelDirection(FirstPlayer.GetLevelDirection());
+                        enemy.SetLevelDimention(FirstPlayer.LEVEL_DIMENTION);
+                        enemy.SetLevelDirection(FirstPlayer.LEVEL_DIRECTION);
                         enemy.SetPlayerCoordinates(FirstPlayer.X, FirstPlayer.Y);
                         enemy.Update(gameTime);
                     }
-                }
+                } 
 
                 CollideAllEntities();
 
@@ -224,8 +242,7 @@ namespace CorridorGravity
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Azure);
-            spriteBatch.Begin();
-            // TODO: Add your drawing code here
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend); 
 
             // Background
             World.Draw(spriteBatch);
@@ -237,11 +254,23 @@ namespace CorridorGravity
             //Characters
             FirstPlayer.Draw(spriteBatch);
 
+            //Magic
+            foreach (var magic in MagicList)
+                magic.Draw(spriteBatch);
+
             //Enemies
             foreach (var enemy in EnemyList)
                 if (!enemy.IsDead)
                     enemy.Draw(spriteBatch);
 
+            // Pause
+            if (IsPaused)
+            {
+                var rect = new Texture2D(GraphicsDevice, 1, 1);
+                rect.SetData(new[] { Color.Black });
+                spriteBatch.Draw(rect, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
+                    Color.Black * 0.3f, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, .5f);
+            }
 
             spriteBatch.End();
             base.Draw(gameTime);

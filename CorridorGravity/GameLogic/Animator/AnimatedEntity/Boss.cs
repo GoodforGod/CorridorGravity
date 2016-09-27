@@ -100,5 +100,9 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
         public override Animation JumpStrike { get; }
 
         public override Animation Celebrate { get; }
+
+        public override Animation Portrait { get; }
+
+        public override Animation Health { get; }
     }
 }

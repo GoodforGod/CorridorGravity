@@ -8,7 +8,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
     class Bob : AnimationEntity
     {
         public const double INTERVAL_DEFAULT = .15;
-        public const double INTERVAL_ATTACK = .15;
+        public const double INTERVAL_ATTACK = .10;
 
         public Bob()
         {
@@ -21,6 +21,8 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             StrikeTwo = new Animation();
             JumpStrike = new Animation();
             Celebrate = new Animation();
+            Portrait = new Animation();
+            Health = new Animation();
 
             // Idle 192x84 (each 48x84) start in 6x15
             Idle.AddFrame(new Rectangle(6, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
@@ -83,9 +85,13 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             JumpStrike.AddFrame(new Rectangle(342, 398, 37, 64), TimeSpan.FromSeconds(INTERVAL_ATTACK));
 
             // Celebrate (144x88 (each 36x88) start in 340x499)
-            Celebrate.AddFrame(new Rectangle(340, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Celebrate.AddFrame(new Rectangle(376, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Celebrate.AddFrame(new Rectangle(422, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Celebrate.AddFrame(new Rectangle(340, 5001, 45, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Celebrate.AddFrame(new Rectangle(389, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Celebrate.AddFrame(new Rectangle(440, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+
+            Portrait.AddFrame(new Rectangle(521, 528, 23, 35), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+ 
+            Health.AddFrame(new Rectangle(440, 499, 36, 38), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
         }
 
         public override Animation Idle { get; }
@@ -105,5 +111,9 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
         public override Animation JumpStrike { get; }
 
         public override Animation Celebrate { get; }
+
+        public override Animation Portrait { get; }
+
+        public override Animation Health { get; }
     }
 }
