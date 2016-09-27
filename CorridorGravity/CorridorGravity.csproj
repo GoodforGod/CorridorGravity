@@ -48,13 +48,13 @@
     <Compile Include="GameLogic\Animator\AnimationFrame.cs" />
     <Compile Include="GameLogic\Animator\AnimationEntity.cs" />
     <Compile Include="GameLogic\Controller.cs" />
-    <Compile Include="GameLogic\Entity\BossEntity.cs" />
-    <Compile Include="GameLogic\Entity\EnemyEntity.cs" />
-    <Compile Include="GameLogic\Entity\Entity.cs" />
-    <Compile Include="GameLogic\Entity\EnviromentEntity.cs" />
-    <Compile Include="GameLogic\Entity\MagicEntity.cs" />
-    <Compile Include="GameLogic\Entity\PlayerEntity.cs" />
-    <Compile Include="GameLogic\Entity\WorldEntity.cs" />
+    <Compile Include="GameLogic\Entities\BossEntity.cs" />
+    <Compile Include="GameLogic\Entities\EnemyEntity.cs" />
+    <Compile Include="GameLogic\Entities\Entity.cs" />
+    <Compile Include="GameLogic\Entities\EnviromentEntity.cs" />
+    <Compile Include="GameLogic\Entities\MagicEntity.cs" />
+    <Compile Include="GameLogic\Entities\PlayerEntity.cs" />
+    <Compile Include="GameLogic\Entities\WorldEntity.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

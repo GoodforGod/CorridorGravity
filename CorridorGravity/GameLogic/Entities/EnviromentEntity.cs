@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System; 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -18,8 +14,8 @@ namespace CorridorGravity.GameLogic
         public override float X { get; set; } 
         public override float Y { get; set; }
 
-        private int LEVEL_HEIGHT { get; set; }
-        private int LEVEL_WIDTH { get; set; }
+        private int LevelHeight { get; set; }
+        private int LevelWidth { get; set; }
 
         private bool EntityDirection;
 
@@ -39,8 +35,8 @@ namespace CorridorGravity.GameLogic
 
         private void ConstractCommonParts(int levelHeight, int levelWidth)
         {
-            LEVEL_HEIGHT = levelHeight/2;
-            LEVEL_WIDTH = levelWidth/2; 
+            LevelHeight = levelHeight/2;
+            LevelWidth = levelWidth/2; 
         }
 
         public Rectangle GetEnviromentSizes()

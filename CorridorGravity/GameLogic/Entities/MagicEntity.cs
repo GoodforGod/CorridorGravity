@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using CorridorGravity.GameLogic;
@@ -15,24 +11,26 @@ namespace CorridorGravity.GameLogic
     class MagicEntity : Entity
     {
         private static Color TintColor = Color.White;
+        public DateTime DeadTime { get; set; }
 
         public override float X { get; set; }
         public override float Y { get; set; }
-          
-        private int OnceAnimationType = -1;
+         
+        private const float TransparentPower = 0.9f;
 
-        private int LEVEL_HEIGHT { get; set; }
-        private int LEVEL_WIDTH { get; set; }
+        private int OnceAnimationType = -1;
+        private bool EntityDirection;
+
+        private int LevelHeight { get; set; }
+        private int LevelWidth { get; set; }
 
         public bool IsSpawned { get; set; }
         public bool IsReadyToSpawn { get; set; }
         public double IsOnceAnimated { get; set; } 
         public bool IsAlive { get; set; }
-        public bool IsDead { get; set; }
-        private float TransparentPower = 1f;
+        public bool IsDead { get; set; } 
 
-        private int LEVEL_DIMENTION { get; set; }
-        private bool EntityDirection;
+        public int LevelDimention { get; set; } 
 
         public override Texture2D EntitySprite { get; }
         public Animation CurrentAnimation { get; set; }
@@ -52,10 +50,10 @@ namespace CorridorGravity.GameLogic
 
         private void ConstractCommonParts(int levelHeight, int levelWidth)
         {
-            LEVEL_HEIGHT = levelHeight / 2;
-            LEVEL_WIDTH = levelWidth / 2;
+            LevelHeight = levelHeight / 2;
+            LevelWidth = levelWidth / 2;
             AnimationsPack = new Magic();
-            LEVEL_DIMENTION = 0;
+            LevelDimention = 0;
             IsAlive = true;
         } 
 
@@ -71,10 +69,11 @@ namespace CorridorGravity.GameLogic
             this.EntityDirection = EntityDirection;
         }
 
-        public void UpdateAnimationBasedOnBoss(float X, float Y, int OnceAnimationType)                           // Update current animation
+        public void UpdateAndRelocate(float X, float Y, int OnceAnimationType)                           // Update current animation
         {
             this.X = X;
             this.Y = Y;
+            IsAlive = true;
             IsOnceAnimated = 0;
             this.OnceAnimationType = OnceAnimationType;
             switch (this.OnceAnimationType)
@@ -91,13 +90,11 @@ namespace CorridorGravity.GameLogic
         { 
             if (IsOnceAnimated != -1)
                 IsOnceAnimated = CurrentAnimation.UpdateSingleAnimationTimeSlapsed(gameTime);
-            else
+            else if(IsAlive)
             {
                 IsReadyToSpawn = false;
                 IsSpawned = false;
-
-                if (IsOnceAnimated == -1)
-                    IsOnceAnimated = 0;
+                IsAlive = false;
             }
             if(IsOnceAnimated > CurrentAnimation.Duration.TotalMilliseconds / 2)
                 IsReadyToSpawn = true;
@@ -108,7 +105,7 @@ namespace CorridorGravity.GameLogic
             SpriteEffects effectsApplyed = SpriteEffects.None;  
             var rotationAngle = .0f;
             
-            switch (LEVEL_DIMENTION)                             // Choose sprite flip, depend on the current dimention
+            switch (LevelDimention)                             // Choose sprite flip, depend on the current dimention
             {
                 case 0:
                     rotationAngle = .0f;

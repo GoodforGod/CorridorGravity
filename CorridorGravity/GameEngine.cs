@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using CorridorGravity.GameLogic;
 using System.Collections.Generic;
+using System;
 
 namespace CorridorGravity
 {
@@ -20,7 +21,8 @@ namespace CorridorGravity
         private bool IsPaused { get; set; }
         private bool ButtonFlag { get; set; }
 
-        private int SpawnTime = 16;
+        private int RespawnTimeInSeconds;
+        private Random RandomMagic = new Random();
 
         private const string ENTITY_PLAYER = "player-2-white-1";
         private const string ENTITY_WORLD = "world-background-score";
@@ -39,7 +41,7 @@ namespace CorridorGravity
         EnviromentEntity Pill_1;
         EnviromentEntity Pill_2;
          
-        PlayerEntity FirstPlayer;
+        PlayerEntity Player;
         WorldEntity World;
 
         public GameEngine()
@@ -64,7 +66,7 @@ namespace CorridorGravity
             World.Init();
 
             MagicEntity Magic_1 = new MagicEntity(Content, ENTITY_MAGIC, FRAME_HEIGHT, FRAME_WIDTH);
-            Magic_1.UpdateAnimationBasedOnBoss(206, 188, 0);
+            Magic_1.UpdateAndRelocate(206, 188, 0);
             MagicList.Add(Magic_1);
         }
         
@@ -81,13 +83,13 @@ namespace CorridorGravity
 
         private void InitCharacter()
         {
-            FirstPlayer = new PlayerEntity(Content, ENTITY_PLAYER, World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, World.WORLD_WIDTH);
-            FirstPlayer.Init(); 
+            Player = new PlayerEntity(Content, ENTITY_PLAYER, World.LevelHeight - FRAME_SCORE_OFFSET, World.LevelWidth);
+            Player.Init(); 
         }
 
         private void CreateEnemy(float X, float Y, bool direction)
         {
-            EnemyList.Add(new EnemyEntity(Content, ENTITY_ENEMY, World.WORLD_HEIGHT - FRAME_SCORE_OFFSET, World.WORLD_WIDTH, direction, X, Y));
+            EnemyList.Add(new EnemyEntity(Content, ENTITY_ENEMY, World.LevelHeight - FRAME_SCORE_OFFSET, World.LevelWidth, direction, X, Y));
         }
 
         protected override void Initialize()
@@ -106,7 +108,7 @@ namespace CorridorGravity
 
             InitCharacter();
 
-            CreateEnemy(World.WORLD_HEIGHT/2, World.WORLD_WIDTH/2, true);
+            CreateEnemy(World.LevelHeight/2, World.LevelWidth/2, true);
 
             base.Initialize();
         }
@@ -139,6 +141,13 @@ namespace CorridorGravity
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         /// 
 
+        private void RelocatePortal(MagicEntity magic)
+        {
+            var newCoordX = RandomMagic.Next(100, FRAME_WIDTH - 100);
+            var newCoordY = RandomMagic.Next(100, FRAME_HEIGHT - 100);
+            magic.UpdateAndRelocate(newCoordX, newCoordY, 0);
+        }
+
         private bool CheckOnTouch(Rectangle character, Rectangle enemy)
         {  
             bool collisionX = (character.X + character.Width >= enemy.X) &&             // X axis
@@ -155,19 +164,19 @@ namespace CorridorGravity
             foreach (var enemy in EnemyList)                // Check collision and take actions
             {
                 if (enemy.IsAlive)
-                    if (CheckOnTouch(new Rectangle((int)FirstPlayer.X, (int)FirstPlayer.Y,
-                                                        FirstPlayer.GetEntityWidth(), FirstPlayer.GetEntityHeight()),
+                    if (CheckOnTouch(new Rectangle((int)Player.X, (int)Player.Y,
+                                                        Player.GetEntityWidth(), Player.GetEntityHeight()),
                                                   new Rectangle((int)enemy.X, (int)enemy.Y,
                                                         enemy.GetEntityWidth(), enemy.GetEntityHeight())))
                     {
-                        if (FirstPlayer.GetPLayerStrikeStatus())
+                        if (Player.GetPLayerStrikeStatus())
                             enemy.IsAlive = false;
-                        else if (enemy.GetEnemyStrikeStatus() && FirstPlayer.EntityDirection == enemy.EntityDirection)
+                        else if (enemy.GetEnemyStrikeStatus() && Player.EntityDirection == enemy.EntityDirection)
                         {
-                            if (!enemy.IsAttacked && FirstPlayer.IsAlive)
+                            if (!enemy.IsAttacked && Player.IsAlive)
                             {
                                 enemy.IsAttacked = true;
-                                FirstPlayer.HealthCount--;
+                                Player.HealthCount--;
                             }
                         }
                     }
@@ -186,6 +195,7 @@ namespace CorridorGravity
             KillList.Clear();
         }
 
+        // MAIN UPDATE
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -199,36 +209,55 @@ namespace CorridorGravity
             }
             if (Keyboard.GetState().IsKeyUp(Keys.P))
                 ButtonFlag = true;
-
-            // Magic Updates
-            foreach(var magic in MagicList)
-            {
-                magic.Update(gameTime);
-                if(magic.IsReadyToSpawn && !magic.IsSpawned)
-                {
-                    magic.IsSpawned = true;
-                    CreateEnemy(magic.X - 30, magic.Y + 20, true);
-                }
-            }
+            
 
             // If not paused
             if (!IsPaused)
             {
+                // Magic Updates
+                foreach (var magic in MagicList)
+                {
+                    magic.Update(gameTime);
+                    if (!magic.IsAlive)
+                    {
+                        if (!magic.IsDead)
+                        {
+                            magic.DeadTime = DateTime.Now;
+                            magic.IsDead = true;
+                            RespawnTimeInSeconds = RandomMagic.Next(1, 9);
+                        }
+                        else if ((DateTime.Now - magic.DeadTime).TotalSeconds > RespawnTimeInSeconds)
+                        {
+                            magic.IsDead = false;
+                            RelocatePortal(magic);
+                        }
+                    }
+                    else magic.LevelDimention = Player.LevelDimention;
+
+                    if (magic.IsReadyToSpawn && !magic.IsSpawned && magic.IsAlive)
+                    {
+                        magic.IsSpawned = true;
+                        //CreateEnemy(magic.X - 30, magic.Y + 20, true);
+                    }
+                }
+
                 // Characters Updates
-                FirstPlayer.Update(gameTime);
+                Player.Update(gameTime);
 
                 //Enemy Update 
                 foreach (var enemy in EnemyList)
                 {
                     if (!enemy.IsDead)
                     {
-                        enemy.SetLevelDimention(FirstPlayer.LEVEL_DIMENTION);
-                        enemy.SetLevelDirection(FirstPlayer.LEVEL_DIRECTION);
-                        enemy.SetPlayerCoordinates(FirstPlayer.X, FirstPlayer.Y);
+                        enemy.SetLevelDimention(Player.LevelDimention);
+                        enemy.SetLevelDirection(Player.LevelDirection);
+                        enemy.PlayerX = Player.X;
+                        enemy.PlayerY = Player.Y;
                         enemy.Update(gameTime);
                     }
                 } 
 
+                // Chekc for collision
                 CollideAllEntities();
 
             }
@@ -252,7 +281,7 @@ namespace CorridorGravity
                 env.Draw(spriteBatch);
 
             //Characters
-            FirstPlayer.Draw(spriteBatch);
+            Player.Draw(spriteBatch);
 
             //Magic
             foreach (var magic in MagicList)

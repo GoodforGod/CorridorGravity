@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System; 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -18,39 +14,42 @@ namespace CorridorGravity.GameLogic
 
         public override float X { get; set; }
         public override float Y { get; set; }
+
+        public float PlayerX { get; set; }
+        public float PlayerY { get; set; }
+
         public override Texture2D EntitySprite { get; }
         public Animation CurrentAnimation { get; set; }
         private Enemy AnimationsPack;
+
         private bool SingleAnimationFlag;
         private int SingleAnimationType = -1;
 
-        public const int EntityHeight = 72;
-        public const int EntityWidth = 44;
+        public const int ENTITY_HEIGHT = 72;
+        public const int ENTITY_WIDTH = 44;
+        private const int LEVEL_OFFSET_HEIGHT = 20;
+        private const int DISTANCE_BETWEEN_ENTITIES = 105;
 
-        private int DistanseBetweenEntitis = 105;
         private const float JUMP_POWER = 450f;
         private const float VELOCITY_AIR_LIMIT_X_AXIS = 40f;
         private const float VELOCITY_LIMIT_X_AXIS = 205f;
         private const float VELOCITY_LIMIT_Y_AXIS = 180f;
         private const float ACCELERATION_AIR_X_AXIS = 3f;
         private const float ACCELERATION_X_AXIS = 85f;
-        private const float GRAVITY = -9.8f;
+        private const float GRAVITY_POWER = -9.8f;
 
         private float SlowDownLimit = 0.001f;
         private float VelocityAxisY = 0;
         private float VelocityAxisX = 0;
-
-        private float PlayerX { get; set; }
-        private float PlayerY { get; set; }
+         
         public bool EntityDirection { get; set; }           // Direction of animation, false - Animation direction right, true - left
         public bool IsAlive { get; set; }
         public bool IsDead { get; set; }
 
-        private int LEVEL_HEIGHT { get; set; }
-        private int LEVEL_WIDTH { get; set; }
-        private int LEVEL_OFFSET_HEIGHT = 20;
-        private int LEVEL_DIRECTION = 1;        // 1 - Correct direction, -1 - inverse
-        private int LEVEL_DIMENTION = 0;        // 0 - Ground=Ground, 
+        private int LevelHeight { get; set; }
+        private int LevelWidth { get; set; } 
+        private int LevelDirection = 1;        // 1 - Correct direction, -1 - inverse
+        private int LevelDimention = 0;        // 0 - Ground=Ground, 
                                                 // 1 - RightWall=Ground, 
                                                 // 2 - Top=Ground,
                                                 // 3 - LeftWall=Ground.
@@ -69,13 +68,13 @@ namespace CorridorGravity.GameLogic
 
         private void ConstractCommonParts(int levelHeight, int levelWidth, bool EntityDirection)
         {
-            LEVEL_HEIGHT = levelHeight - LEVEL_OFFSET_HEIGHT;
-            LEVEL_WIDTH = levelWidth;
+            LevelHeight = levelHeight - LEVEL_OFFSET_HEIGHT;
+            LevelWidth = levelWidth;
 
             AnimationsPack = new Enemy();
             CurrentAnimation = AnimationsPack.Idle;
-            Y = -LEVEL_HEIGHT + 100;
-            X = LEVEL_WIDTH - 100;
+            Y = -LevelHeight + 100;
+            X = LevelWidth - 100;
             IsAlive = true;
             this.EntityDirection = EntityDirection;
         }
@@ -87,13 +86,13 @@ namespace CorridorGravity.GameLogic
             else return false;
         }
 
-        public int GetEntityWidth() { return EntityWidth; }
+        public int GetEntityWidth() { return ENTITY_WIDTH; }
 
-        public int GetEntityHeight() { return EntityHeight; }
+        public int GetEntityHeight() { return ENTITY_HEIGHT; }
 
-        public void SetLevelDirection(int LEVEL_DIRECTION) { this.LEVEL_DIRECTION = LEVEL_DIRECTION; }
+        public void SetLevelDirection(int LEVEL_DIRECTION) { this.LevelDirection = LEVEL_DIRECTION; }
 
-        public void SetLevelDimention(int LEVEL_DIMENTION) { this.LEVEL_DIMENTION = LEVEL_DIMENTION; }
+        public void SetLevelDimention(int LEVEL_DIMENTION) { this.LevelDimention = LEVEL_DIMENTION; }
 
         public void SetPlayerCoordinates(float X, float Y) { PlayerX = X; PlayerY = Y; }
 
@@ -101,7 +100,7 @@ namespace CorridorGravity.GameLogic
         {
             if (IsGrounded())
             {
-                switch (LEVEL_DIMENTION)
+                switch (LevelDimention)
                 {
                     case 0:
                     case 2:
@@ -119,7 +118,7 @@ namespace CorridorGravity.GameLogic
             }
             else
             {
-                switch (LEVEL_DIMENTION)
+                switch (LevelDimention)
                 {
                     case 0:
                     case 2:
@@ -140,7 +139,7 @@ namespace CorridorGravity.GameLogic
         {
             if (IsGrounded())
             {
-                switch (LEVEL_DIMENTION)
+                switch (LevelDimention)
                 {
                     case 0:
                     case 2:
@@ -158,7 +157,7 @@ namespace CorridorGravity.GameLogic
             }
             else
             {
-                switch (LEVEL_DIMENTION)
+                switch (LevelDimention)
                 {
                     case 0:
                     case 2:
@@ -178,7 +177,7 @@ namespace CorridorGravity.GameLogic
 
         private void SlowVelocityRight()                                        //Slow down acceleration
         {
-            if ((LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2) && VelocityAxisX > SlowDownLimit)
+            if ((LevelDimention == 0 || LevelDimention == 2) && VelocityAxisX > SlowDownLimit)
             {
                 VelocityAxisX -= ACCELERATION_X_AXIS;
                 if (VelocityAxisX < 0)
@@ -194,7 +193,7 @@ namespace CorridorGravity.GameLogic
 
         private void SlowVelocityLeft()                                         // Slow down acceleration
         {
-            if ((LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2) && VelocityAxisX < -SlowDownLimit)
+            if ((LevelDimention == 0 || LevelDimention == 2) && VelocityAxisX < -SlowDownLimit)
             {
                 VelocityAxisX += ACCELERATION_X_AXIS;
                 if (VelocityAxisX > 0)
@@ -213,7 +212,7 @@ namespace CorridorGravity.GameLogic
             var dimentionVelocity = 0f;
             SingleAnimationFlag = true;
 
-            switch (LEVEL_DIMENTION)
+            switch (LevelDimention)
             {
                 case 0: dimentionVelocity = VelocityAxisY; break;
                 case 1: dimentionVelocity = VelocityAxisX; break;
@@ -241,7 +240,7 @@ namespace CorridorGravity.GameLogic
 
             if (!SingleAnimationFlag)
             {
-                switch (LEVEL_DIMENTION)
+                switch (LevelDimention)
                 {
                     case 0:
                     case 2: between = PlayerX - X; break;
@@ -252,9 +251,9 @@ namespace CorridorGravity.GameLogic
 
                 if (EntityDirection)
                 {
-                    if (between > 0 && between < DistanseBetweenEntitis)
+                    if (between > 0 && between < DISTANCE_BETWEEN_ENTITIES)
                     {
-                        switch (LEVEL_DIMENTION)
+                        switch (LevelDimention)
                         {
                             case 0: VelocityAxisY -= VELOCITY_LIMIT_X_AXIS; break;
                             case 1: VelocityAxisX -= VELOCITY_LIMIT_X_AXIS; break;
@@ -265,9 +264,9 @@ namespace CorridorGravity.GameLogic
                         SetAirAnimationType(0);
                     }
                 }
-                else if (between < 0 && between > -DistanseBetweenEntitis)
+                else if (between < 0 && between > -DISTANCE_BETWEEN_ENTITIES)
                 {
-                    switch (LEVEL_DIMENTION)
+                    switch (LevelDimention)
                     {
                         case 0: VelocityAxisY -= VELOCITY_LIMIT_X_AXIS; break;
                         case 1: VelocityAxisX -= VELOCITY_LIMIT_X_AXIS; break;
@@ -281,7 +280,7 @@ namespace CorridorGravity.GameLogic
 
             if (rightState)                                                                     // Right Acceleration
             {
-                if (LEVEL_DIRECTION == 1)       // if InverseAxisDirections was applyed
+                if (LevelDirection == 1)       // if InverseAxisDirections was applyed
                     IncreaseVelocityRight();
                 else
                     IncreaseVelocityLeft();
@@ -289,7 +288,7 @@ namespace CorridorGravity.GameLogic
 
             if (leftState)                                                                       // Left Acceleration
             {
-                if (LEVEL_DIRECTION == 1)       // if InverseAxisDirections was applyed
+                if (LevelDirection == 1)       // if InverseAxisDirections was applyed
                     IncreaseVelocityLeft();
                 else
                     IncreaseVelocityRight();
@@ -297,7 +296,7 @@ namespace CorridorGravity.GameLogic
 
             if (IsGrounded() && !rightState)                                                     // Right SlowDown
             {
-                if (LEVEL_DIRECTION == 1)
+                if (LevelDirection == 1)
                     SlowVelocityRight();
                 else
                     SlowVelocityLeft();
@@ -305,7 +304,7 @@ namespace CorridorGravity.GameLogic
 
             if (IsGrounded() && !leftState)                                                      // Left SlowDown
             {
-                if (LEVEL_DIRECTION == 1)
+                if (LevelDirection == 1)
                     SlowVelocityLeft();
                 else
                     SlowVelocityRight();
@@ -313,18 +312,18 @@ namespace CorridorGravity.GameLogic
 
             if (!IsGrounded())                                                                   // Gravity activater in air
             {
-                switch (LEVEL_DIMENTION)
+                switch (LevelDimention)
                 {
-                    case 0: VelocityAxisY -= GRAVITY; break;
-                    case 1: VelocityAxisX -= GRAVITY; break;
-                    case 2: VelocityAxisY += GRAVITY; break;
-                    case 3: VelocityAxisX += GRAVITY; break;
+                    case 0: VelocityAxisY -= GRAVITY_POWER; break;
+                    case 1: VelocityAxisX -= GRAVITY_POWER; break;
+                    case 2: VelocityAxisY += GRAVITY_POWER; break;
+                    case 3: VelocityAxisX += GRAVITY_POWER; break;
                     default: break;
                 }
             }
             else if (IsGrounded())                                                             // On ground, failsave from 
             {
-                switch (LEVEL_DIMENTION)
+                switch (LevelDimention)
                 {
                     case 0:
                         if (VelocityAxisY > 0)                     // If jump key down & on the ground
@@ -352,7 +351,7 @@ namespace CorridorGravity.GameLogic
             X += VelocityAxisX * (float)gameTime.ElapsedGameTime.TotalSeconds;
             Y += VelocityAxisY * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            switch (LEVEL_DIMENTION)                    // Restore player coordinates, if out of frame, depends on Dimention
+            switch (LevelDimention)                    // Restore player coordinates, if out of frame, depends on Dimention
             {
                 case 0: CoordinatesInFrameGround(); break;
                 case 1: CoordinatesInFrameWall(); break;
@@ -378,7 +377,7 @@ namespace CorridorGravity.GameLogic
             else if (VelocityAxisX != 0 || VelocityAxisY != 0)
             {
                 var dimentionVelocity = VelocityAxisX;
-                if (LEVEL_DIMENTION == 0 || LEVEL_DIMENTION == 2)
+                if (LevelDimention == 0 || LevelDimention == 2)
                     dimentionVelocity = VelocityAxisY;
 
                 if (dimentionVelocity > 0)
@@ -394,21 +393,21 @@ namespace CorridorGravity.GameLogic
 
         private void CoordinatesInFrameWall()                                   // Case dimention is one of the walls
         {
-            if (X - EntityHeight < 0)
+            if (X - ENTITY_HEIGHT < 0)
             {                                        // X position fall out frame
-                X = EntityHeight;
+                X = ENTITY_HEIGHT;
                 VelocityAxisX = 0;
             }
-            else if (X - LEVEL_OFFSET_HEIGHT > LEVEL_WIDTH)
+            else if (X - LEVEL_OFFSET_HEIGHT > LevelWidth)
             {
-                if (LEVEL_DIMENTION == 1)
+                if (LevelDimention == 1)
                 {
-                    X = LEVEL_WIDTH - EntityWidth;
+                    X = LevelWidth - ENTITY_WIDTH;
                     VelocityAxisX = 0;
                 }
                 else
                 {
-                    X = LEVEL_WIDTH;
+                    X = LevelWidth;
                     VelocityAxisX = 0;
                 }
             }
@@ -418,10 +417,10 @@ namespace CorridorGravity.GameLogic
                 EntityDirection = false;
                 Y = VelocityAxisY = 0;
             }
-            else if (Y + EntityWidth >= LEVEL_HEIGHT)
+            else if (Y + ENTITY_WIDTH >= LevelHeight)
             {         // Y position fall out frame 
                 EntityDirection = true;
-                Y = LEVEL_HEIGHT - EntityWidth;         // Velocity = 0;
+                Y = LevelHeight - ENTITY_WIDTH;         // Velocity = 0;
                 VelocityAxisY = 0;
             }
         }
@@ -433,18 +432,18 @@ namespace CorridorGravity.GameLogic
                 EntityDirection = true;
                 X = VelocityAxisX = 0;
             }
-            else if (X + EntityWidth > LEVEL_WIDTH)
+            else if (X + ENTITY_WIDTH > LevelWidth)
             {
                 EntityDirection = false;
-                X = LEVEL_WIDTH - EntityWidth;
+                X = LevelWidth - ENTITY_WIDTH;
                 VelocityAxisX = 0;
             }
 
             if (Y < 0)
                 Y = VelocityAxisY = 0;
-            else if (Y + EntityHeight >= LEVEL_HEIGHT)          // Y position fall out frame
+            else if (Y + ENTITY_HEIGHT >= LevelHeight)          // Y position fall out frame
             {
-                Y = LEVEL_HEIGHT - EntityHeight;         // Velocity = 0;
+                Y = LevelHeight - ENTITY_HEIGHT;         // Velocity = 0;
                 VelocityAxisY = 0;
             }
         }
@@ -453,15 +452,15 @@ namespace CorridorGravity.GameLogic
         {
             var offset = 1;
 
-            switch (LEVEL_DIMENTION)
+            switch (LevelDimention)
             {
                 case 0:
-                    if (Y + EntityHeight + offset >= LEVEL_HEIGHT)
+                    if (Y + ENTITY_HEIGHT + offset >= LevelHeight)
                         return true;
                     else return false;
 
                 case 1:
-                    if (X + LEVEL_OFFSET_HEIGHT - offset * 2 >= LEVEL_WIDTH)
+                    if (X + LEVEL_OFFSET_HEIGHT - offset * 2 >= LevelWidth)
                         return true;
                     else return false;
 
@@ -480,7 +479,7 @@ namespace CorridorGravity.GameLogic
 
         private void InverseAxisDirections()
         {
-            LEVEL_DIRECTION = -LEVEL_DIRECTION;
+            LevelDirection = -LevelDirection;
         }
 
         public override void Update(GameTime gameTime)
@@ -517,7 +516,7 @@ namespace CorridorGravity.GameLogic
 
             var rotationAngle = .0f;
 
-            switch (LEVEL_DIMENTION)                             // Choose sprite flip, depend on the current dimention
+            switch (LevelDimention)                             // Choose sprite flip, depend on the current dimention
             {
                 case 0:
                     rotationAngle = .0f;

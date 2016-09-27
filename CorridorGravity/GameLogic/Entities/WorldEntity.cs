@@ -8,8 +8,8 @@ namespace CorridorGravity.GameLogic
 {
     class WorldEntity : Entity
     {
-        public int WORLD_WIDTH { get; }
-        public int WORLD_HEIGHT { get; }
+        public int LevelWidth { get; set; }
+        public int LevelHeight { get; set; }
 
         public override Texture2D EntitySprite { get; }
 
@@ -17,31 +17,31 @@ namespace CorridorGravity.GameLogic
 
         public WorldEntity(ContentManager content)
         {
-            WORLD_WIDTH = 1024;
-            WorldRectangle = new Rectangle(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+            LevelWidth = 1024;
+            WorldRectangle = new Rectangle(0, 0, LevelWidth, LevelHeight);
             EntitySprite = content.Load<Texture2D>("world-background");
         }
 
         public WorldEntity(ContentManager content, int width, int height)
         {
-            WORLD_WIDTH = width;
-            WORLD_HEIGHT = height;
-            WorldRectangle = new Rectangle(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+            LevelWidth = width;
+            LevelHeight = height;
+            WorldRectangle = new Rectangle(0, 0, LevelWidth, LevelHeight);
             EntitySprite = content.Load<Texture2D>("world-background");
         }
 
         public WorldEntity(ContentManager content, string contentName)
         {
-            WORLD_HEIGHT = 1024;
-            WorldRectangle = new Rectangle(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+            LevelHeight = 1024;
+            WorldRectangle = new Rectangle(0, 0, LevelWidth, LevelHeight);
             EntitySprite = content.Load<Texture2D>(contentName);
         }
 
         public WorldEntity(ContentManager content, string contentName, int width, int height)
         {
-            WORLD_WIDTH = width;
-            WORLD_HEIGHT = height;
-            WorldRectangle = new Rectangle(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+            LevelWidth = width;
+            LevelHeight = height;
+            WorldRectangle = new Rectangle(0, 0, LevelWidth, LevelHeight);
             EntitySprite = content.Load<Texture2D>(contentName);
         }
 
