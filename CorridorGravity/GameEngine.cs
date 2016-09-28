@@ -169,11 +169,14 @@ namespace CorridorGravity
                                                   new Rectangle((int)enemy.X, (int)enemy.Y,
                                                         enemy.GetEntityWidth(), enemy.GetEntityHeight())))
                     {
-                        if (Player.GetPLayerStrikeStatus())
+                        if (Player.GetPLayerStrikeStatus())               // Kill enemy, if player attacked and was collision
+                        {
                             enemy.IsAlive = false;
+                            Player.ScoreCount += Player.GetScorePerEnemy();
+                        }
                         else if (enemy.GetEnemyStrikeStatus() && Player.EntityDirection == enemy.EntityDirection)
                         {
-                            if (!enemy.IsAttacked && Player.IsAlive)
+                            if (!enemy.IsAttacked && Player.IsAlive)         // If player not attacked, but collided, player minuse health
                             {
                                 enemy.IsAttacked = true;
                                 Player.HealthCount--;
@@ -181,7 +184,7 @@ namespace CorridorGravity
                         }
                     }
                     else
-                        enemy.IsAttacked = false; 
+                        enemy.IsAttacked = false;               // Make sure that enemy attack once per collision
             }
 
 
@@ -194,73 +197,79 @@ namespace CorridorGravity
             EnemyList.RemoveAll(e => KillList.Contains(e));
             KillList.Clear();
         }
-
-        // MAIN UPDATE
+        
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // Check for pause input  
-            if (Keyboard.GetState().IsKeyDown(Keys.P) && ButtonFlag)
+            // Check if active, if not, pause game
+            if (IsActive)
             {
-                ButtonFlag = false;
-                IsPaused = !IsPaused;
-            }
-            if (Keyboard.GetState().IsKeyUp(Keys.P))
-                ButtonFlag = true;
-            
-
-            // If not paused
-            if (!IsPaused)
-            {
-                // Magic Updates
-                foreach (var magic in MagicList)
+                // Check for pause input  
+                if (Keyboard.GetState().IsKeyDown(Keys.P) && ButtonFlag)
                 {
-                    magic.Update(gameTime);
-                    if (!magic.IsAlive)
-                    {
-                        if (!magic.IsDead)
-                        {
-                            magic.DeadTime = DateTime.Now;
-                            magic.IsDead = true;
-                            RespawnTimeInSeconds = RandomMagic.Next(1, 9);
-                        }
-                        else if ((DateTime.Now - magic.DeadTime).TotalSeconds > RespawnTimeInSeconds)
-                        {
-                            magic.IsDead = false;
-                            RelocatePortal(magic);
-                        }
-                    }
-                    else magic.LevelDimention = Player.LevelDimention;
-
-                    if (magic.IsReadyToSpawn && !magic.IsSpawned && magic.IsAlive)
-                    {
-                        magic.IsSpawned = true;
-                        //CreateEnemy(magic.X - 30, magic.Y + 20, true);
-                    }
+                    ButtonFlag = false;
+                    IsPaused = !IsPaused;
                 }
+                if (Keyboard.GetState().IsKeyUp(Keys.P))
+                    ButtonFlag = true;
 
-                // Characters Updates
-                Player.Update(gameTime);
 
-                //Enemy Update 
-                foreach (var enemy in EnemyList)
+                // If not paused
+                if (!IsPaused && IsActive)
                 {
-                    if (!enemy.IsDead)
+                    // Magic Updates
+                    foreach (var magic in MagicList)
                     {
-                        enemy.SetLevelDimention(Player.LevelDimention);
-                        enemy.SetLevelDirection(Player.LevelDirection);
-                        enemy.PlayerX = Player.X;
-                        enemy.PlayerY = Player.Y;
-                        enemy.Update(gameTime);
+                        magic.Update(gameTime);
+                        if (!magic.IsAlive)
+                        {
+                            if (!magic.IsDead)                                                              // Start respawn timer, if dead
+                            {
+                                magic.DeadTime = DateTime.Now;
+                                magic.IsDead = true;
+                                RespawnTimeInSeconds = RandomMagic.Next(1, 9);
+                            }
+                            else if ((DateTime.Now - magic.DeadTime).TotalSeconds > RespawnTimeInSeconds)   // Relocate when time is up    
+                            {
+                                magic.IsDead = false;
+                                RelocatePortal(magic);
+                            }
+                        }
+                        else magic.LevelDimention = Player.LevelDimention;
+
+                        // Portal spawns enemies
+                        if (magic.IsReadyToSpawn && !magic.IsSpawned && magic.IsAlive)
+                        {
+                            magic.IsSpawned = true;
+                            //CreateEnemy(magic.X - 30, magic.Y + 20, true);
+                        }
                     }
-                } 
 
-                // Chekc for collision
-                CollideAllEntities();
+                    // Characters Updates
+                    Player.Update(gameTime);
 
+                    //Enemy Update 
+                    foreach (var enemy in EnemyList)
+                    {
+                        if (!enemy.IsDead)
+                        {
+                            enemy.SetLevelDimention(Player.LevelDimention);
+                            enemy.SetLevelDirection(Player.LevelDirection);
+                            enemy.PlayerX = Player.X;
+                            enemy.PlayerY = Player.Y;
+                            enemy.Update(gameTime);
+                        }
+                    }
+
+                    // Chekc for collision
+                    CollideAllEntities();
+
+                }
             }
+            else IsPaused = true;
+
             base.Update(gameTime);
         }
 
@@ -271,34 +280,38 @@ namespace CorridorGravity
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Azure);
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend); 
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
 
-            // Background
-            World.Draw(spriteBatch);
-
-            //Enviroment
-            foreach (var env in EnvList)
-                env.Draw(spriteBatch);
-
-            //Characters
-            Player.Draw(spriteBatch);
-
-            //Magic
-            foreach (var magic in MagicList)
-                magic.Draw(spriteBatch);
-
-            //Enemies
-            foreach (var enemy in EnemyList)
-                if (!enemy.IsDead)
-                    enemy.Draw(spriteBatch);
-
-            // Pause
-            if (IsPaused)
+            // If window is active
+            if (IsActive)
             {
-                var rect = new Texture2D(GraphicsDevice, 1, 1);
-                rect.SetData(new[] { Color.Black });
-                spriteBatch.Draw(rect, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
-                    Color.Black * 0.3f, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, .5f);
+                // Background
+                World.Draw(spriteBatch);
+
+                //Enviroment
+                foreach (var env in EnvList)
+                    env.Draw(spriteBatch);
+
+                //Characters
+                Player.Draw(spriteBatch);
+
+                //Magic
+                foreach (var magic in MagicList)
+                    magic.Draw(spriteBatch);
+
+                //Enemies
+                foreach (var enemy in EnemyList)
+                    if (!enemy.IsDead)
+                        enemy.Draw(spriteBatch);
+
+                // Pause
+                if (IsPaused)
+                {
+                    var rect = new Texture2D(GraphicsDevice, 1, 1);
+                    rect.SetData(new[] { Color.Black });
+                    spriteBatch.Draw(rect, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
+                        Color.Black * 0.3f, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, .5f);
+                } 
             }
 
             spriteBatch.End();

@@ -15,13 +15,15 @@ namespace CorridorGravity.GameLogic
         public override float X { get; set; }
         public override float Y { get; set; }
 
+        public SpriteFont ScoreFont { get; }
         public override Texture2D EntitySprite { get; }
-        public Animation CurrentAnimation { get; set; } 
-        private Bob AnimationsPack; 
+        public Animation CurrentAnimation { get; set; }
+        private Bob AnimationsPack;
 
         public const int ENTITY_HEIGHT = 90;
         public const int ENTITY_WIDTH = 44;
-        private const int LEVEL_OFFSET_HEIGHT = 20; 
+        private const int LEVEL_OFFSET_HEIGHT = 20;
+        private const int SCORE_PER_ENEMY = 10;
 
         private const float JUMP_POWER = 350f;
         private const float VELOCITY_AIR_LIMIT_X_AXIS = 40f;
@@ -56,12 +58,14 @@ namespace CorridorGravity.GameLogic
 
         public PlayerEntity(ContentManager content, int levelHeight, int levelWidth)
         {
+            ScoreFont = content.Load<SpriteFont>("score-font");
             EntitySprite = content.Load<Texture2D>("player-2-white-1");
             ConstractCommonParts(levelHeight, levelWidth);
         }
 
         public PlayerEntity(ContentManager content, string contentName, int levelHeight, int levelWidth)
         {
+            ScoreFont = content.Load<SpriteFont>("score-font");
             EntitySprite = content.Load<Texture2D>(contentName);
             ConstractCommonParts(levelHeight, levelWidth);
         }
@@ -78,7 +82,6 @@ namespace CorridorGravity.GameLogic
             ScoreCount = 0;
             HealthCount = 6;
             IsAlive = true;
-
             AnimationsPack = new Bob();
             CurrentAnimation = AnimationsPack.Celebrate;
             OnceAnimationType = 3;
@@ -97,15 +100,11 @@ namespace CorridorGravity.GameLogic
             else return false;
         }
 
-        public int GetEntityWidth()
-        {
-            return CurrentAnimation.CurrentRectangle.Width;
-        }
+        public int GetScorePerEnemy() { return SCORE_PER_ENEMY; }
 
-        public int GetEntityHeight()
-        {
-            return CurrentAnimation.CurrentRectangle.Height;
-        }
+        public int GetEntityWidth()  { return CurrentAnimation.CurrentRectangle.Width; }
+
+        public int GetEntityHeight() { return CurrentAnimation.CurrentRectangle.Height;  }
 
         private void IncreaseVelocityRight()                // If right key down & speed not max, then accelerate
         {
@@ -585,14 +584,14 @@ namespace CorridorGravity.GameLogic
 
         public override void Update(GameTime gameTime)
         {
-            if (HealthCount < 1)
+            if (HealthCount < 1)                // Make sure that health is > 0
                 IsAlive = false;
 
             UpdateVelocityBasedOnInput();
 
             UpdateCoordinatesBasedOnVelocity(gameTime);
 
-            if(!IsAlive)
+            if(!IsAlive)                        // Is got killed, set die animation
             {
                 IsOnceAnimated = true;
                 OnceAnimationType = 4;
@@ -600,7 +599,7 @@ namespace CorridorGravity.GameLogic
 
             UpdateAnimationBasedOnVelocity();
 
-            if (!IsOnceAnimated && IsAlive)
+            if (!IsOnceAnimated && IsAlive)                         // If alive and not onceAnim, play cycle animation
                 CurrentAnimation.UpdateCycleAnimation(gameTime);
             else
             { 
@@ -688,8 +687,11 @@ namespace CorridorGravity.GameLogic
                                             rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
             }
             // Portrait draw
-            batcher.Draw(EntitySprite, new Vector2(LevelWidth - 38, LevelHeight - 40), AnimationsPack.Portrait.CurrentRectangle, Color.Beige,
-                            0f, new Vector2(1, 1), 1f, SpriteEffects.None, .0f); 
+            batcher.Draw(EntitySprite, new Vector2(LevelWidth - LEVEL_OFFSET_HEIGHT * 2, LevelHeight), AnimationsPack.Portrait.CurrentRectangle, Color.Beige,
+                            0f, new Vector2(1, 1), 1f, SpriteEffects.None, .0f);
+
+            // Draw Scores
+            batcher.DrawString(ScoreFont, "Score: " + ScoreCount.ToString(), new Vector2(LevelWidth - LEVEL_OFFSET_HEIGHT*10, LevelHeight), TintColor);
 
             // Health bar draw
             for(int i = 0; i < HealthCount; i++)

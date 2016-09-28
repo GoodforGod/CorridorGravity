@@ -89,7 +89,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             Celebrate.AddFrame(new Rectangle(389, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
             Celebrate.AddFrame(new Rectangle(440, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
 
-            Portrait.AddFrame(new Rectangle(521, 528, 23, 35), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Portrait.AddFrame(new Rectangle(543, 531, 23, 34), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
  
             Health.AddFrame(new Rectangle(440, 499, 36, 38), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
         }

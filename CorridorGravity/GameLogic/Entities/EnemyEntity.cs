@@ -21,6 +21,7 @@ namespace CorridorGravity.GameLogic
         public override Texture2D EntitySprite { get; }
         public Animation CurrentAnimation { get; set; }
         private Enemy AnimationsPack;
+        private Magic MagicAnimationPack;
 
         private bool IsOnceAnimated;
         private int OnceAnimationType = -1;
@@ -72,6 +73,7 @@ namespace CorridorGravity.GameLogic
             LevelHeight = levelHeight - LEVEL_OFFSET_HEIGHT;
             LevelWidth = levelWidth;
 
+            MagicAnimationPack = new Magic();
             AnimationsPack = new Enemy();
             CurrentAnimation = AnimationsPack.Idle;
             IsAlive = true;
@@ -369,7 +371,7 @@ namespace CorridorGravity.GameLogic
                     case 0: CurrentAnimation = AnimationsPack.StrikeOne;    break; 
                     case 2: CurrentAnimation = AnimationsPack.JumpStrike;   break;
                     case 3: CurrentAnimation = AnimationsPack.Celebrate;    break;
-                    case 4: CurrentAnimation = AnimationsPack.Dead;         break;
+                    case 4: CurrentAnimation = MagicAnimationPack.Dead;     break;
                     default:                                                break;
                 }
             }
@@ -488,19 +490,29 @@ namespace CorridorGravity.GameLogic
             {
                 IsOnceAnimated = true;
                 OnceAnimationType = 4;
-            }
-            else IsDead = true;
+            } 
 
             UpdateAnimationBasedOnVelocity();
 
             if (!IsOnceAnimated)
-                CurrentAnimation.UpdateCycleAnimation(gameTime);
+                CurrentAnimation.UpdateCycleAnimation(gameTime); 
+            else
+            {
+                if (!IsDead)
+                    IsOnceAnimated = CurrentAnimation.UpdateSingleAnimationIsEnded(gameTime);
+                if (!IsOnceAnimated)
+                    OnceAnimationType = -1;
+                if (!IsAlive && OnceAnimationType == -1)
+                    IsDead = true;
+            }
+            /*
             else
             {
                 IsOnceAnimated = CurrentAnimation.UpdateSingleAnimationIsEnded(gameTime);
                 if (!IsOnceAnimated)
                     OnceAnimationType = -1;
-            }
+            } 
+            */
 
         }
 
