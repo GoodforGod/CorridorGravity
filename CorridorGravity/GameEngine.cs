@@ -121,7 +121,7 @@ namespace CorridorGravity
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            IsMouseVisible = true;
+            //IsMouseVisible = true;
             NextScoreGoal = 200;  
 
             MagicList = new List<MagicEntity>();
@@ -461,13 +461,13 @@ namespace CorridorGravity
                     if (IsPaused)
                     { 
                         spriteBatch.Draw(PauseTexture, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
-                            Color.Black * 0.3f, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, .5f);
+                            Color.White * 0.3f, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, .5f);
                     }
 
                     if (Player.IsDead)
                     { 
-                        spriteBatch.Draw(DeadTexture, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
-                            Color.Black * TransparentPower, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, TransparentPower);
+                        spriteBatch.Draw(DeadTexture, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT), 
+                            Color.White * TransparentPower, 0f, new Vector2(1, 1), 1f, SpriteEffects.None, TransparentPower);
 
                         if (TransparentPower < .99f)
                             TransparentPower += TransparentInc;

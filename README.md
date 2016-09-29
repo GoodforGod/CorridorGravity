@@ -1,17 +1,10 @@
 # Corridor Gravity
-![Alt text](relative/CorridorGravity/readme-1.png?raw=true)
+![](https://github.com/GoodforGod/CorridorGravity/blob/master/CorridorGravity/readme-1.png)
 
 Endless slasher with hordes of enemies and ultimate Boss.
 Try to servive as long as possible.
 
 Game was created during 1 week, from the beginning to the end, with no practice in monogame.
- 
-# Version :date:
- *Alpha 1.0.0*
-
-# Used :bar_chart:
- - Monogame
- - Visual Studio 2015
 
 #Controll :exclamation:
   - A/D or <- -> to move left and right.
@@ -20,10 +13,17 @@ Game was created during 1 week, from the beginning to the end, with no practice 
  
 # Getting started :clipboard:
 
-[Link to the .EXE file](relative/CorridorGravity/CorridorGravity/bin/DesktopGL/x86/Debug/CorridorGravity.exe)
+[Link to the .EXE file](https://github.com/GoodforGod/CorridorGravity/blob/master/CorridorGravity/CorridorGravity.exe)
+
+# Used :bar_chart:
+ - Monogame
+ - Visual Studio 2015
+
+# Version :date:
+ *Alpha 1.0.0*
 
 # Ifno :speech_balloon:
 
-![Alt text](relative/CorridorGravity/readme-2.png?raw=true)
+![Alt text](https://github.com/GoodforGod/CorridorGravity/blob/master/CorridorGravity/readme-2.png)
 
 :calendar: 2016.

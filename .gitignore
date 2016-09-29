@@ -7,6 +7,8 @@
 *.userosscache
 *.sln.docstates
 
+!CorridorGravity.exe
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
