@@ -19,6 +19,7 @@ namespace CorridorGravity.GameLogic
         public override Texture2D EntitySprite { get; }
         public Animation CurrentAnimation { get; set; }
         private Bob AnimationsPack;
+        public DateTime LastHitTime;
 
         public const int ENTITY_HEIGHT = 90;
         public const int ENTITY_WIDTH = 44;

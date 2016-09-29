@@ -139,3 +139,9 @@
 /processorParam:TextureFormat=Color
 /build:magolor-soul-white.png
 
+#begin joshuaempyre-arcade-music-loop.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:joshuaempyre-arcade-music-loop.mp3
+

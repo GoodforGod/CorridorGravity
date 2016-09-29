@@ -8,7 +8,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
     class Boss : AnimationEntity
     {
         public const double INTERVAL_DEFAULT = .15;
-        public const double INTERVAL_ATTACK = .25;
+        public const double INTERVAL_ATTACK = .20;
         public const double INTERVAL_STEADY = .25;
         public const double INTERVAL_TENTLE = .35; 
 
@@ -18,9 +18,9 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
 
         public Boss()
         {
-            EyeWhitePart = new Rectangle(489, 133, 52, 52);
+            EyeWhitePart = new Rectangle(482, 133, 68, 56);
             EyeRedPart = new Rectangle(500, 94, 29, 28);
-            EyeBlackPart = new Rectangle(509, 80, 10, 10);
+            EyeBlackPart = new Rectangle(510, 71, 8, 8);
 
             Idle = new Animation();
             Walk = new Animation();
@@ -61,9 +61,9 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             // Fist appear (each 68x88) start in 727x346
             StrikeOne.AddFrame(new Rectangle(727, 346, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
             StrikeOne.AddFrame(new Rectangle(727, 349, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
-            StrikeOne.AddFrame(new Rectangle(727, 352, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
-            StrikeOne.AddFrame(new Rectangle(727, 355, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
-            StrikeOne.AddFrame(new Rectangle(727, 358, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
+            //StrikeOne.AddFrame(new Rectangle(727, 352, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
+            //StrikeOne.AddFrame(new Rectangle(727, 355, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
+            //StrikeOne.AddFrame(new Rectangle(727, 358, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
 
             // Fist Attack (each 68x88) start in 642x346
             StrikeOne.AddFrame(new Rectangle(642, 346, 68, 88), TimeSpan.FromSeconds(INTERVAL_ATTACK));

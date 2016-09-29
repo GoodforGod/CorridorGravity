@@ -8,7 +8,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
 {
     class Magic : AnimationEntity
     {
-        public const double INTERVAL_PORTAL_PURPLE = .10; 
+        public const double INTERVAL_PORTAL_PURPLE = .20; 
         public const double INTERVAL_PORTAL_BLACK = .10;
         public const double INTERVAL_TURBINE_BLACK = .10; 
         public const double INTERVAL_TURBINE_PURPLE = .25;
@@ -48,30 +48,30 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             Idle.AddFrame(new Rectangle(444, 292, 50, 60), TimeSpan.FromSeconds(INTERVAL_PORTAL_BLACK));
 
             // PurplePortal  (each 32x78) start in 212x99
-            Idle.AddFrame(new Rectangle(1, 1, 1, 1), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(1, 541, 20, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(16, 541, 20, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(37, 541, 20, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(59, 541, 20, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(82, 541, 20, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(102, 541, 30, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(128, 541, 30, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(158, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(187, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(217, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(245, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(276, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(311, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(346, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(382, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(419, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(457, 541, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(5, 577, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(41, 577, 32, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(81, 577, 33, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(121, 577, 33, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(154, 577, 33, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
-            Walk.AddFrame(new Rectangle(184, 577, 33, 83), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(1, 1, 1, 1), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(1, 541, 20, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(16, 541, 20, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(37, 541, 20, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(59, 541, 20, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(82, 541, 20, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(102, 541, 30, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(128, 541, 30, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(158, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(187, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(217, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(245, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(276, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(311, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(346, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(382, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(419, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(457, 541, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(5, 577, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(41, 577, 32, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(81, 577, 33, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(121, 577, 33, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(154, 577, 33, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
+            Walk.AddFrame(new Rectangle(184, 577, 33, 84), TimeSpan.FromSeconds(INTERVAL_PORTAL_PURPLE));
 
             // TurbinePurple  (each 41x92) start in 205x7 
             Jump.AddFrame(new Rectangle(254, 9, 36, 90), TimeSpan.FromSeconds(INTERVAL_TURBINE_PURPLE));

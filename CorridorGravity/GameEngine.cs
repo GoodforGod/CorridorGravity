@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using CorridorGravity.GameLogic;
 using System.Collections.Generic;
 using System;
+using Microsoft.Xna.Framework.Media;
 
 namespace CorridorGravity
 {
@@ -15,15 +16,22 @@ namespace CorridorGravity
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        SpriteFont StatusFont;
+        Song BackgroundSong;
+
         private const int FRAME_WIDTH = 1024;
         private const int FRAME_HEIGHT = 768;
         private const int FRAME_SCORE_OFFSET = 40;
         private bool IsPaused { get; set; }
         private bool ButtonFlag { get; set; }
 
-        private int PortalRespawnTimeInSeconds;
-        private int BossRespawnTimeInSeconds;
+        private float TransparentPower = 0.05f;
+        private float TransparentInc = 0.01f;
+        private float PortalRespawnTimeInSeconds;
+        private float BossRespawnTimeInSeconds;
         private Random LocationRandomizer;
+        private int NextScoreGoal = 200;
+        private const int ScoreStep = 1000;
 
         private const string ENTITY_PLAYER = "player-2-white-1";
         private const string ENTITY_WORLD = "world-background-score";
@@ -37,10 +45,7 @@ namespace CorridorGravity
         List<EnemyEntity> EnemyList;
         List<EnemyEntity> KillList;
 
-        // For now player one, soooooooo... Wait for multiplayer..
-
-        EnviromentEntity Pill_1;
-        EnviromentEntity Pill_2;
+        // For now player one, soooooooo... Wait for multiplayer.. 
          
         PlayerEntity Player;
         WorldEntity World;
@@ -79,13 +84,13 @@ namespace CorridorGravity
         
         private void InitEnviroment()
         { 
-            Pill_1 = new EnviromentEntity(Content, ENTITY_PILL, FRAME_WIDTH, FRAME_HEIGHT);
-            Pill_2 = new EnviromentEntity(Content, ENTITY_PILL, FRAME_WIDTH, FRAME_HEIGHT);
-            Pill_1.Init(206, 268, true);
-            Pill_2.Init(562, 268, false);
+            //Pill_1 = new EnviromentEntity(Content, ENTITY_PILL, FRAME_WIDTH, FRAME_HEIGHT);
+            //Pill_2 = new EnviromentEntity(Content, ENTITY_PILL, FRAME_WIDTH, FRAME_HEIGHT);
+            //Pill_1.Init(206, 268, true);
+            //Pill_2.Init(562, 268, false);
 
-            EnvList.Add(Pill_1);
-            EnvList.Add(Pill_2);
+            //EnvList.Add(Pill_1);
+            //EnvList.Add(Pill_2);
         }
 
         private void InitCharacter()
@@ -103,6 +108,7 @@ namespace CorridorGravity
         {
             // TODO: Add your initialization logic here
             IsMouseVisible = true;
+            NextScoreGoal = 200;  
 
             MagicList = new List<MagicEntity>();
             EnvList = new List<EnviromentEntity>();
@@ -127,8 +133,13 @@ namespace CorridorGravity
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
-            spriteBatch = new SpriteBatch(GraphicsDevice);
+            spriteBatch = new SpriteBatch(GraphicsDevice); 
 
+            StatusFont = Content.Load<SpriteFont>("score-font");
+            BackgroundSong = Content.Load<Song>("joshuaempyre-arcade-music-loop");
+
+            MediaPlayer.Play(BackgroundSong);
+            MediaPlayer.IsRepeating = true;
             // TODO: use this.Content to load your game content here
         }
 
@@ -153,20 +164,27 @@ namespace CorridorGravity
             var newCoordX = 0;
             var newCoordY = 0;
 
+            var bossSummonRect = new Rectangle();
+
+            if (Boss.SummonAnimation == null)
+                bossSummonRect = new Rectangle(0, 0, 0, 0);
+            else
+                Boss.GetSummonPosition();
+
             do
             {
                 newCoordX = LocationRandomizer.Next(100, FRAME_WIDTH - 100);
                 newCoordY = LocationRandomizer.Next(100, FRAME_HEIGHT - 100);
             }
-            while ((CheckOnTouch(magic.GetMagicPosition(newCoordX, newCoordY), Boss.GetBossPosition())));
+            while ((CheckOnTouch(magic.GetMagicPosition(newCoordX, newCoordY), bossSummonRect)));
 
             magic.UpdateAndRelocate(newCoordX, newCoordY, 0);
         }
 
         private void RelocateBoss(BossEntity boss)
         {
-            var newCoordX = LocationRandomizer.Next(100, FRAME_WIDTH - 100);
-            var newCoordY = LocationRandomizer.Next(100, FRAME_HEIGHT - 100);
+            var newCoordX = LocationRandomizer.Next(100, FRAME_WIDTH - 220);
+            var newCoordY = LocationRandomizer.Next(80, FRAME_HEIGHT - 300);
             boss.UpdateAndRelocate(newCoordX, newCoordY, 0, false);
         }
 
@@ -183,7 +201,26 @@ namespace CorridorGravity
 
         private void CollideAllEntities()
         {
-            foreach (var enemy in EnemyList)                // Check collision and take actions
+            // check collision vs boss strike 
+            if (Boss.IsSummoned)
+            {
+                if (Boss.SummonAnimation != null && Boss.IsSummoned)
+                {
+                    if (CheckOnTouch(new Rectangle((int)Player.X, (int)Player.Y,
+                                                            Player.GetEntityWidth(), Player.GetEntityHeight()),
+                                                      new Rectangle((int)Boss.SummonX, (int)Boss.SummonY, Boss.SummonAnimation.CurrentRectangle.Width, Boss.SummonAnimation.CurrentRectangle.Height))
+                                                              && Player.IsAlive
+                                                                && (DateTime.Now - Player.LastHitTime).TotalSeconds > 1)
+                    {
+                        Player.HealthCount--;
+                        Player.LastHitTime = DateTime.Now;
+                    }
+                }
+            }
+
+
+            // Check collision and take actions vs enemy strike
+            foreach (var enemy in EnemyList)
             {
                 if (enemy.IsAlive)
                     if (CheckOnTouch(new Rectangle((int)Player.X, (int)Player.Y,
@@ -191,25 +228,22 @@ namespace CorridorGravity
                                                   new Rectangle((int)enemy.X, (int)enemy.Y,
                                                         enemy.GetEntityWidth(), enemy.GetEntityHeight())))
                     {
-                        if (Player.GetPLayerStrikeStatus())               // Kill enemy, if player attacked and was collision
+                        // Kill enemy, if player attacked and was collision
+                        if (Player.GetPLayerStrikeStatus())               
                         {
                             enemy.IsAlive = false;
                             Player.ScoreCount += Player.GetScorePerEnemy();
                         }
-                        else if (enemy.GetEnemyStrikeStatus() && Player.EntityDirection == enemy.EntityDirection)
+                        else if (enemy.GetEnemyStrikeStatus() && Player.IsAlive 
+                            && (DateTime.Now - Player.LastHitTime).TotalSeconds > 1)
                         {
-                            if (Player.IsAlive && !enemy.IsAttacked)         // If player not attacked, but collided, player minuse health
-                            {
-                                enemy.IsAttacked = true;
-                                Player.HealthCount--;
-                            }
+                            Player.HealthCount--;
+                            Player.LastHitTime = DateTime.Now;
                         }
-                    }
-                    else
-                        enemy.IsAttacked = false;               // Make sure that enemy attack once per collision
+                    } 
             } 
-
-            foreach (var enemy in EnemyList)                    // Clean dead entities
+            // Clean dead entities
+            foreach (var enemy in EnemyList)                    
             {
                 if (enemy.IsDead) 
                     KillList.Add(enemy); 
@@ -227,32 +261,47 @@ namespace CorridorGravity
             // Check if active, if not, pause game
             if (IsActive)
             {
+
                 // Check for pause input  
                 if (Keyboard.GetState().IsKeyDown(Keys.P) && ButtonFlag)
                 {
                     ButtonFlag = false;
                     IsPaused = !IsPaused;
+
+                    if (IsPaused)
+                        MediaPlayer.Pause();
+                    else MediaPlayer.Resume();
                 }
                 if (Keyboard.GetState().IsKeyUp(Keys.P))
-                    ButtonFlag = true;
-
+                    ButtonFlag = true; 
 
                 // If not paused
                 if (!IsPaused && IsActive)
                 {
                     //Boss
+                    Boss.PlayerX = Player.X;
+                    Boss.PlayerY = Player.Y;
+                    //Boss.LevelDimention = Player.LevelDimention;
                     Boss.Update(gameTime);
+
+                    if (Boss.IsDead)
+                        Player.LevelDimention = Boss.LevelDimention;
 
                     if (Boss.IsDead && Boss.IsReadyToSpawn && (DateTime.Now - Boss.DeadTime).TotalSeconds > BossRespawnTimeInSeconds)   // Relocate when time is up    
                     {
+                        // Spawn boss when time has come
                         Boss.IsReadyToSpawn = false;
                         Boss.IsDead = false;
                         RelocateBoss(Boss);
                     }
                     else if (!Boss.IsReadyToSpawn && Boss.IsDead)
                     {
+                        // Set boss next spawn time
                         Boss.IsReadyToSpawn = true;
                         BossRespawnTimeInSeconds = LocationRandomizer.Next(1, 3);
+                        BossRespawnTimeInSeconds -= Player.ScoreCount / 1000;
+                        if (BossRespawnTimeInSeconds < 2)
+                            BossRespawnTimeInSeconds = 2;
                     }
 
                     // Magic Updates
@@ -261,14 +310,19 @@ namespace CorridorGravity
                         magic.Update(gameTime);
                         if (!magic.IsAlive)
                         {
-                            if (!magic.IsDead)                                                              // Start respawn timer, if dead
+                            // Start respawn timer, if dead
+                            if (!magic.IsDead)
                             {
                                 magic.DeadTime = DateTime.Now;
                                 magic.IsDead = true;
-                                PortalRespawnTimeInSeconds = LocationRandomizer.Next(1, 9);
+                                PortalRespawnTimeInSeconds = LocationRandomizer.Next(2, 9);
+                                PortalRespawnTimeInSeconds -= Player.ScoreCount / 1000;
+                                if (PortalRespawnTimeInSeconds < 1)
+                                    PortalRespawnTimeInSeconds = 1;
                             }
-                            else if ((DateTime.Now - magic.DeadTime).TotalSeconds > PortalRespawnTimeInSeconds)   // Relocate when time is up    
+                            else if ((DateTime.Now - magic.DeadTime).TotalSeconds > PortalRespawnTimeInSeconds)
                             {
+                                // Relocate when time has come   
                                 magic.IsDead = false;
                                 RelocatePortal(magic);
                             }
@@ -284,7 +338,6 @@ namespace CorridorGravity
                     }
 
                     // Characters Updates
-                    Player.LevelDimention = Boss.LevelDimention; 
                     Player.Update(gameTime);
 
                     //Enemy Update 
@@ -292,8 +345,8 @@ namespace CorridorGravity
                     {
                         if (!enemy.IsDead)
                         {
-                            enemy.SetLevelDimention(Player.LevelDimention);
-                            enemy.SetLevelDirection(Player.LevelDirection);
+                            enemy.LevelDimention = Player.LevelDimention;
+                            enemy.LevelDirection = Player.LevelDirection;
                             enemy.PlayerX = Player.X;
                             enemy.PlayerY = Player.Y;
                             enemy.Update(gameTime);
@@ -303,9 +356,20 @@ namespace CorridorGravity
                     // Chekc for collision
                     CollideAllEntities();
 
+                    //Spawn more portals
+                    if (Player.ScoreCount > NextScoreGoal)
+                    {
+                        MagicList.Add(new MagicEntity(Content, ENTITY_MAGIC, FRAME_HEIGHT, FRAME_WIDTH));
+                        NextScoreGoal += ScoreStep;
+                    }
+
                 }
             }
-            else IsPaused = true;
+            else
+            {
+                MediaPlayer.Pause();
+                IsPaused = true;
+            }
 
             base.Update(gameTime);
         }
@@ -326,18 +390,19 @@ namespace CorridorGravity
                 World.Draw(spriteBatch);
 
                 //Enviroment
-                foreach (var env in EnvList)
-                    env.Draw(spriteBatch);
+                //foreach (var env in EnvList)
+                //    env.Draw(spriteBatch);
 
-                //Characters
-                Player.Draw(spriteBatch);
-
-                //Boss
-                Boss.Draw(spriteBatch);
 
                 //Magic
                 foreach (var magic in MagicList)
                     magic.Draw(spriteBatch);
+
+                //Boss
+                Boss.Draw(spriteBatch);
+
+                //Characters
+                Player.Draw(spriteBatch);  
 
                 //Enemies
                 foreach (var enemy in EnemyList)
@@ -352,6 +417,19 @@ namespace CorridorGravity
                     spriteBatch.Draw(rect, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
                         Color.Black * 0.3f, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, .5f);
                 } 
+
+                if(Player.IsDead)
+                {
+                    var rect = new Texture2D(GraphicsDevice, 1, 1);
+                    rect.SetData(new[] { Color.Black });
+                    spriteBatch.Draw(rect, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
+                        Color.Black * TransparentPower, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, TransparentPower);
+
+                    spriteBatch.DrawString(StatusFont, "DEAD", new Vector2(FRAME_WIDTH / 2, FRAME_HEIGHT / 2), Color.Red);
+
+                    if(TransparentPower < .99f)
+                        TransparentPower += TransparentInc;
+                }
             }
 
             spriteBatch.End();

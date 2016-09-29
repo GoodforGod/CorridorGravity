@@ -50,9 +50,9 @@ namespace CorridorGravity.GameLogic
         public bool IsAttacked { get; set; } 
         
         private int LevelHeight { get; set; }
-        private int LevelWidth { get; set; } 
-        private int LevelDirection = 1;        // 1 - Correct direction, -1 - inverse
-        private int LevelDimention = 0;        // 0 - Ground=Ground, 
+        private int LevelWidth { get; set; }
+        public int LevelDirection { get; set; }       // 1 - Correct direction, -1 - inverse
+        public int LevelDimention { get; set; }       // 0 - Ground=Ground, 
                                                 // 1 - RightWall=Ground, 
                                                 // 2 - Top=Ground,
                                                 // 3 - LeftWall=Ground.
@@ -70,6 +70,8 @@ namespace CorridorGravity.GameLogic
             IsAlive = true;
             this.Y = X;
             this.X = Y;
+            LevelDimention = 0;
+            LevelDirection = 1;
             this.EntityDirection = EntityDirection;
         }
 
@@ -82,11 +84,7 @@ namespace CorridorGravity.GameLogic
 
         public int GetEntityWidth() { return ENTITY_WIDTH; }
 
-        public int GetEntityHeight() { return ENTITY_HEIGHT; }
-
-        public void SetLevelDirection(int LevelDirection) { this.LevelDirection = LevelDirection; }
-
-        public void SetLevelDimention(int LevelDimention) { this.LevelDimention = LevelDimention; }
+        public int GetEntityHeight() { return ENTITY_HEIGHT; } 
 
         private void IncreaseVelocityRight()                                // If right key down & speed not max, then accelerate
         {

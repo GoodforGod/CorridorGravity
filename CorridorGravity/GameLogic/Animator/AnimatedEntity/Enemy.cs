@@ -7,7 +7,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
 {
     class Enemy : AnimationEntity
     {
-        public const double INTERVAL_DEFAULT = .15;
+        public const double INTERVAL_DEFAULT = .12;
         public const double INTERVAL_ATTACK = .25;
 
         public Enemy()
