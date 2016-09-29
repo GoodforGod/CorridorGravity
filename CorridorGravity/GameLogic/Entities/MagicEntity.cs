@@ -34,32 +34,24 @@ namespace CorridorGravity.GameLogic
 
         public override Texture2D EntitySprite { get; }
         public Animation CurrentAnimation { get; set; }
-        private Magic AnimationsPack;
-
-        public MagicEntity(ContentManager content, int levelHeight, int levelWidth)
-        {
-            EntitySprite = content.Load<Texture2D>("magic-white");
-            ConstractCommonParts(levelHeight, levelWidth);
-        }
+        private Magic AnimationsPack; 
 
         public MagicEntity(ContentManager content, string contentName, int levelHeight, int levelWidth)
         {
-            EntitySprite = content.Load<Texture2D>(contentName);
-            ConstractCommonParts(levelHeight, levelWidth);
-        }
-
-        private void ConstractCommonParts(int levelHeight, int levelWidth)
-        {
             LevelHeight = levelHeight / 2;
             LevelWidth = levelWidth / 2;
-            AnimationsPack = new Magic();
+            AnimationsPack = new Magic(content);
             LevelDimention = 0;
             IsAlive = true;
-        } 
-
-        public Rectangle GetEnviromentSizes()
+        }
+        public Rectangle GetMagicPosition()
         {
-            return new Rectangle((int)X, (int)Y, EntitySprite.Width, EntitySprite.Height);
+            return new Rectangle((int)X, (int)Y, CurrentAnimation.CurrentRectangle.Width, CurrentAnimation.CurrentRectangle.Height);
+        }
+
+        public Rectangle GetMagicPosition(float X, float Y)
+        {
+            return new Rectangle((int)X, (int)Y, CurrentAnimation.CurrentRectangle.Width, CurrentAnimation.CurrentRectangle.Height);
         }
 
         public void Init(int X, int Y, bool EntityDirection)
@@ -87,17 +79,20 @@ namespace CorridorGravity.GameLogic
         }
         
         public override void Update(GameTime gameTime)
-        { 
-            if (IsOnceAnimated != -1)
-                IsOnceAnimated = CurrentAnimation.UpdateSingleAnimationTimeSlapsed(gameTime);
-            else if(IsAlive)
+        {
+            if (!IsDead)
             {
-                IsReadyToSpawn = false;
-                IsSpawned = false;
-                IsAlive = false;
+                if (IsOnceAnimated != -1)
+                    IsOnceAnimated = CurrentAnimation.UpdateSingleAnimationTimeSlapsed(gameTime);
+                else if (IsAlive)
+                {
+                    IsReadyToSpawn = false;
+                    IsSpawned = false;
+                    IsAlive = false;
+                }
+                if (IsOnceAnimated > CurrentAnimation.Duration.TotalMilliseconds / 2)
+                    IsReadyToSpawn = true;
             }
-            if(IsOnceAnimated > CurrentAnimation.Duration.TotalMilliseconds / 2)
-                IsReadyToSpawn = true;
         }
 
         public override void Draw(SpriteBatch batcher)
@@ -139,14 +134,9 @@ namespace CorridorGravity.GameLogic
             }
 
             if (IsOnceAnimated != -1)
-                batcher.Draw(EntitySprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, TintColor*TransparentPower,
+                batcher.Draw(AnimationsPack.MagicSprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, TintColor*TransparentPower,
                                             rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
 
-        }
-
-        public override void Touch()
-        {
-            base.Touch();
-        }
+        } 
     }
 }

@@ -9,9 +9,19 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
     {
         public const double INTERVAL_DEFAULT = .15;
         public const double INTERVAL_ATTACK = .25;
+        public const double INTERVAL_STEADY = .25;
+        public const double INTERVAL_TENTLE = .35; 
+
+        public Rectangle EyeWhitePart { get; }
+        public Rectangle EyeRedPart { get; }
+        public Rectangle EyeBlackPart { get; }
 
         public Boss()
         {
+            EyeWhitePart = new Rectangle(489, 133, 52, 52);
+            EyeRedPart = new Rectangle(500, 94, 29, 28);
+            EyeBlackPart = new Rectangle(509, 80, 10, 10);
+
             Idle = new Animation();
             Walk = new Animation();
             Jump = new Animation();
@@ -22,65 +32,58 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             JumpStrike = new Animation();
             Celebrate = new Animation();
 
-            // Idle 192x84 (each 48x60) start in 212x99
-            Idle.AddFrame(new Rectangle(212, 99, 48, 60), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Idle.AddFrame(new Rectangle(276, 99, 48, 60), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Idle.AddFrame(new Rectangle(340, 99, 48, 60), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Idle.AddFrame(new Rectangle(404, 99, 48, 60), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            // Idle (each 200x232) start in 0x0
+            Idle.AddFrame(new Rectangle(218, 0, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(218, 2, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(218, 4, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(218, 6, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(0, 8, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(0, 10, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(0, 8, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(218, 6, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(218, 4, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(218, 2, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Idle.AddFrame(new Rectangle(218, 0, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
 
-            // Walk 240x82 (each 48x60) start in 212x99
-            Walk.AddFrame(new Rectangle(212, 99, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Walk.AddFrame(new Rectangle(50, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Walk.AddFrame(new Rectangle(99, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Walk.AddFrame(new Rectangle(149, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Walk.AddFrame(new Rectangle(199, 239, 44, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            // Walk (each 200x232) start in 218x250
+            Walk.AddFrame(new Rectangle(218, 250, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(218, 252, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(218, 254, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(218, 256, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(7, 258, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(7, 260, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(7, 258, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(218, 256, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(218, 254, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(218, 252, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            Walk.AddFrame(new Rectangle(218, 250, 200, 232), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
 
-            // Jump 164x92 (each 41x92) start in 205x7
-            //Jump.AddFrame(new Rectangle(206, 9, 44, 90), TimeSpan.FromSeconds(INTERVAL));
-            Jump.AddFrame(new Rectangle(254, 9, 36, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Jump.AddFrame(new Rectangle(296, 9, 32, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Jump.AddFrame(new Rectangle(332, 9, 36, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Jump.AddFrame(new Rectangle(296, 9, 32, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Jump.AddFrame(new Rectangle(254, 9, 36, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            //Jump.AddFrame(new Rectangle(206, 9, 44, 90), TimeSpan.FromSeconds(INTERVAL));
+            // Fist appear (each 68x88) start in 727x346
+            StrikeOne.AddFrame(new Rectangle(727, 346, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
+            StrikeOne.AddFrame(new Rectangle(727, 349, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
+            StrikeOne.AddFrame(new Rectangle(727, 352, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
+            StrikeOne.AddFrame(new Rectangle(727, 355, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
+            StrikeOne.AddFrame(new Rectangle(727, 358, 68, 88), TimeSpan.FromSeconds(INTERVAL_STEADY));
 
-            // Intro equal Celebrate
+            // Fist Attack (each 68x88) start in 642x346
+            StrikeOne.AddFrame(new Rectangle(642, 346, 68, 88), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeOne.AddFrame(new Rectangle(642, 349, 68, 88), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeOne.AddFrame(new Rectangle(642, 352, 68, 88), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeOne.AddFrame(new Rectangle(642, 355, 68, 88), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeOne.AddFrame(new Rectangle(642, 358, 68, 88), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeOne.AddFrame(new Rectangle(642, 355, 68, 88), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeOne.AddFrame(new Rectangle(642, 352, 68, 88), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            StrikeOne.AddFrame(new Rectangle(642, 349, 68, 88), TimeSpan.FromSeconds(INTERVAL_ATTACK));
 
-            // Dead 212x92 (each 73x92) start in 295x131
-            Dead.AddFrame(new Rectangle(295, 131, 73, 92), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Dead.AddFrame(new Rectangle(368, 131, 73, 92), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Dead.AddFrame(new Rectangle(441, 131, 73, 92), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            // Wave (each 100x142) start in 478x500
+            Jump.AddFrame(new Rectangle(478, 500, 118, 142), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            Jump.AddFrame(new Rectangle(613, 500, 118, 142), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            Jump.AddFrame(new Rectangle(754, 500, 118, 142), TimeSpan.FromSeconds(INTERVAL_ATTACK)); 
 
-            // StrikeOne (first two 100x86, (each 50x86) start in 2x129), 
-            // thrid (75x86 start in 107x130), 
-            // fourth and fifth equal first two.
-            StrikeOne.AddFrame(new Rectangle(1, 129, 50, 86), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeOne.AddFrame(new Rectangle(51, 129, 50, 86), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeOne.AddFrame(new Rectangle(107, 130, 75, 86), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeOne.AddFrame(new Rectangle(51, 129, 50, 86), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeOne.AddFrame(new Rectangle(1, 129, 50, 86), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-
-            // StrikeTwo First (48x84 start in 3x368)
-            // Second (80x96 start in 57x357)
-            // Third (54x112 start in 140x341)
-            // Forth and fifth equal second and first
-            StrikeTwo.AddFrame(new Rectangle(3, 368, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeTwo.AddFrame(new Rectangle(57, 357, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeTwo.AddFrame(new Rectangle(140, 341, 54, 112), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeTwo.AddFrame(new Rectangle(57, 357, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            StrikeTwo.AddFrame(new Rectangle(3, 368, 48, 84), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-
-            // JumpStrike First (37x64 start in 342x398)
-            // Second (60x64 start in 384x399)
-            // Third equal first
-            JumpStrike.AddFrame(new Rectangle(342, 398, 37, 64), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            JumpStrike.AddFrame(new Rectangle(384, 399, 60, 64), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-            JumpStrike.AddFrame(new Rectangle(342, 398, 37, 64), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-
-            // Celebrate (144x88 (each 36x88) start in 340x499)
-            Celebrate.AddFrame(new Rectangle(340, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Celebrate.AddFrame(new Rectangle(376, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
-            Celebrate.AddFrame(new Rectangle(422, 499, 36, 88), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+            // Tentcle  (each 156x116) start in 728x16
+            Celebrate.AddFrame(new Rectangle(728, 16, 156, 116), TimeSpan.FromSeconds(INTERVAL_TENTLE));
+            Celebrate.AddFrame(new Rectangle(728, 131, 156, 116), TimeSpan.FromSeconds(INTERVAL_TENTLE));
+            Celebrate.AddFrame(new Rectangle(728, 231, 156, 116), TimeSpan.FromSeconds(INTERVAL_TENTLE));
         }
 
         public override Animation Idle { get; }

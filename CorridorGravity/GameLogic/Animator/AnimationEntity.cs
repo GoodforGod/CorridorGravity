@@ -9,7 +9,7 @@ namespace CorridorGravity.GameLogic.Animator
 {
     abstract class AnimationEntity
     {
-        public const double DEFAULT_INTERVAL = 0.15;
+        public const double DEFAULT_INTERVAL = 0.15; 
 
         public abstract Animation Idle { get; }
 

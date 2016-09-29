@@ -2,6 +2,7 @@
 using CorridorGravity.GameLogic.Animator;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 
 namespace CorridorGravity.GameLogic.AnimatedEntity
 {
@@ -12,8 +13,12 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
         public const double INTERVAL_TURBINE_BLACK = .10; 
         public const double INTERVAL_TURBINE_PURPLE = .25;
 
-        public Magic()
+        public  Texture2D MagicSprite { get; }
+        
+
+        public Magic(ContentManager content)
         {
+            MagicSprite = content.Load<Texture2D>("magic-white");
             Idle = new Animation();
             Walk = new Animation();
             Jump = new Animation();

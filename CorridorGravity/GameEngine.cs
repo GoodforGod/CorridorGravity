@@ -21,8 +21,9 @@ namespace CorridorGravity
         private bool IsPaused { get; set; }
         private bool ButtonFlag { get; set; }
 
-        private int RespawnTimeInSeconds;
-        private Random RandomMagic = new Random();
+        private int PortalRespawnTimeInSeconds;
+        private int BossRespawnTimeInSeconds;
+        private Random LocationRandomizer;
 
         private const string ENTITY_PLAYER = "player-2-white-1";
         private const string ENTITY_WORLD = "world-background-score";
@@ -43,6 +44,7 @@ namespace CorridorGravity
          
         PlayerEntity Player;
         WorldEntity World;
+        BossEntity Boss;
 
         public GameEngine()
         {
@@ -68,6 +70,11 @@ namespace CorridorGravity
             MagicEntity Magic_1 = new MagicEntity(Content, ENTITY_MAGIC, FRAME_HEIGHT, FRAME_WIDTH);
             Magic_1.UpdateAndRelocate(206, 188, 0);
             MagicList.Add(Magic_1);
+
+            Boss = new BossEntity(Content, ENTITY_BOSS, FRAME_HEIGHT, FRAME_WIDTH);
+            Boss.UpdateAndRelocate(500, 500, 0, false);
+
+            LocationRandomizer = new Random(Guid.NewGuid().GetHashCode());
         }
         
         private void InitEnviroment()
@@ -95,7 +102,7 @@ namespace CorridorGravity
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            this.IsMouseVisible = true;
+            IsMouseVisible = true;
 
             MagicList = new List<MagicEntity>();
             EnvList = new List<EnviromentEntity>();
@@ -143,9 +150,24 @@ namespace CorridorGravity
 
         private void RelocatePortal(MagicEntity magic)
         {
-            var newCoordX = RandomMagic.Next(100, FRAME_WIDTH - 100);
-            var newCoordY = RandomMagic.Next(100, FRAME_HEIGHT - 100);
+            var newCoordX = 0;
+            var newCoordY = 0;
+
+            do
+            {
+                newCoordX = LocationRandomizer.Next(100, FRAME_WIDTH - 100);
+                newCoordY = LocationRandomizer.Next(100, FRAME_HEIGHT - 100);
+            }
+            while ((CheckOnTouch(magic.GetMagicPosition(newCoordX, newCoordY), Boss.GetBossPosition())));
+
             magic.UpdateAndRelocate(newCoordX, newCoordY, 0);
+        }
+
+        private void RelocateBoss(BossEntity boss)
+        {
+            var newCoordX = LocationRandomizer.Next(100, FRAME_WIDTH - 100);
+            var newCoordY = LocationRandomizer.Next(100, FRAME_HEIGHT - 100);
+            boss.UpdateAndRelocate(newCoordX, newCoordY, 0, false);
         }
 
         private bool CheckOnTouch(Rectangle character, Rectangle enemy)
@@ -176,7 +198,7 @@ namespace CorridorGravity
                         }
                         else if (enemy.GetEnemyStrikeStatus() && Player.EntityDirection == enemy.EntityDirection)
                         {
-                            if (!enemy.IsAttacked && Player.IsAlive)         // If player not attacked, but collided, player minuse health
+                            if (Player.IsAlive && !enemy.IsAttacked)         // If player not attacked, but collided, player minuse health
                             {
                                 enemy.IsAttacked = true;
                                 Player.HealthCount--;
@@ -185,8 +207,7 @@ namespace CorridorGravity
                     }
                     else
                         enemy.IsAttacked = false;               // Make sure that enemy attack once per collision
-            }
-
+            } 
 
             foreach (var enemy in EnemyList)                    // Clean dead entities
             {
@@ -219,6 +240,21 @@ namespace CorridorGravity
                 // If not paused
                 if (!IsPaused && IsActive)
                 {
+                    //Boss
+                    Boss.Update(gameTime);
+
+                    if (Boss.IsDead && Boss.IsReadyToSpawn && (DateTime.Now - Boss.DeadTime).TotalSeconds > BossRespawnTimeInSeconds)   // Relocate when time is up    
+                    {
+                        Boss.IsReadyToSpawn = false;
+                        Boss.IsDead = false;
+                        RelocateBoss(Boss);
+                    }
+                    else if (!Boss.IsReadyToSpawn && Boss.IsDead)
+                    {
+                        Boss.IsReadyToSpawn = true;
+                        BossRespawnTimeInSeconds = LocationRandomizer.Next(1, 3);
+                    }
+
                     // Magic Updates
                     foreach (var magic in MagicList)
                     {
@@ -229,15 +265,15 @@ namespace CorridorGravity
                             {
                                 magic.DeadTime = DateTime.Now;
                                 magic.IsDead = true;
-                                RespawnTimeInSeconds = RandomMagic.Next(1, 9);
+                                PortalRespawnTimeInSeconds = LocationRandomizer.Next(1, 9);
                             }
-                            else if ((DateTime.Now - magic.DeadTime).TotalSeconds > RespawnTimeInSeconds)   // Relocate when time is up    
+                            else if ((DateTime.Now - magic.DeadTime).TotalSeconds > PortalRespawnTimeInSeconds)   // Relocate when time is up    
                             {
                                 magic.IsDead = false;
                                 RelocatePortal(magic);
                             }
                         }
-                        else magic.LevelDimention = Player.LevelDimention;
+                        else magic.LevelDimention = Boss.LevelDimention;
 
                         // Portal spawns enemies
                         if (magic.IsReadyToSpawn && !magic.IsSpawned && magic.IsAlive)
@@ -248,6 +284,7 @@ namespace CorridorGravity
                     }
 
                     // Characters Updates
+                    Player.LevelDimention = Boss.LevelDimention; 
                     Player.Update(gameTime);
 
                     //Enemy Update 
@@ -294,6 +331,9 @@ namespace CorridorGravity
 
                 //Characters
                 Player.Draw(spriteBatch);
+
+                //Boss
+                Boss.Draw(spriteBatch);
 
                 //Magic
                 foreach (var magic in MagicList)

@@ -67,18 +67,6 @@
 /processorParam:TextureFormat=Color
 /build:health-bar.png
 
-#begin magolor-soul-white.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:magolor-soul-white.png
-
 #begin player-1-white-1.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -138,4 +126,16 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:magic-white.png
+
+#begin magolor-soul-white.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:magolor-soul-white.png
 

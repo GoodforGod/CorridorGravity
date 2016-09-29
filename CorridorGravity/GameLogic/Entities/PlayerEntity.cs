@@ -106,7 +106,7 @@ namespace CorridorGravity.GameLogic
 
         public int GetEntityHeight() { return CurrentAnimation.CurrentRectangle.Height;  }
 
-        private void IncreaseVelocityRight()                // If right key down & speed not max, then accelerate
+        private void IncreaseVelocityRight(int limit)                // If right key down & speed not max, then accelerate
         {
             if (IsGrounded())
             {
@@ -114,13 +114,13 @@ namespace CorridorGravity.GameLogic
                 {
                     case 0:
                     case 2:
-                        if (VelocityAxisX < VELOCITY_LIMIT_X_AXIS)
+                        if (VelocityAxisX < VELOCITY_LIMIT_X_AXIS - limit)
                             VelocityAxisX += ACCELERATION_X_AXIS;
                         EntityDirection = false;
                         break;
                     case 1:
                     case 3:
-                        if (VelocityAxisY > -VELOCITY_LIMIT_X_AXIS)
+                        if (VelocityAxisY > -VELOCITY_LIMIT_X_AXIS + limit)
                             VelocityAxisY -= ACCELERATION_X_AXIS;
                         EntityDirection = true;
                         break;
@@ -134,13 +134,13 @@ namespace CorridorGravity.GameLogic
                 {
                     case 0:
                     case 2:
-                        if (VelocityAxisX < VELOCITY_AIR_LIMIT_X_AXIS)
+                        if (VelocityAxisX < VELOCITY_AIR_LIMIT_X_AXIS - limit)
                             VelocityAxisX += ACCELERATION_AIR_X_AXIS;
                         EntityDirection = false;
                         break;
                     case 1:
                     case 3:
-                        if (VelocityAxisY > -VELOCITY_AIR_LIMIT_X_AXIS)
+                        if (VelocityAxisY > -VELOCITY_AIR_LIMIT_X_AXIS + limit)
                             VelocityAxisY -= ACCELERATION_AIR_X_AXIS;
                         EntityDirection = true;
                         break;
@@ -149,7 +149,7 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        private void IncreaseVelocityLeft()                 // If left key down & speed not max, then accelerate
+        private void IncreaseVelocityLeft(int limit)                 // If left key down & speed not max, then accelerate
         {
             if (IsGrounded())
             {
@@ -157,13 +157,13 @@ namespace CorridorGravity.GameLogic
                 {
                     case 0:
                     case 2:
-                        if (VelocityAxisX > -VELOCITY_LIMIT_X_AXIS)
+                        if (VelocityAxisX > -VELOCITY_LIMIT_X_AXIS + limit)
                             VelocityAxisX -= ACCELERATION_X_AXIS;
                         EntityDirection = true;
                         break;
                     case 1:
                     case 3:
-                        if (VelocityAxisY < VELOCITY_LIMIT_X_AXIS)
+                        if (VelocityAxisY < VELOCITY_LIMIT_X_AXIS - limit)
                             VelocityAxisY += ACCELERATION_X_AXIS;
                         EntityDirection = false;
                         break;
@@ -177,13 +177,13 @@ namespace CorridorGravity.GameLogic
                 {
                     case 0:
                     case 2:
-                        if (VelocityAxisX > -VELOCITY_AIR_LIMIT_X_AXIS)
+                        if (VelocityAxisX > -VELOCITY_AIR_LIMIT_X_AXIS + limit)
                             VelocityAxisX -= ACCELERATION_AIR_X_AXIS;
                         EntityDirection = true;
                         break;
                     case 1:
                     case 3:
-                        if (VelocityAxisY < VELOCITY_AIR_LIMIT_X_AXIS)
+                        if (VelocityAxisY < VELOCITY_AIR_LIMIT_X_AXIS - limit)
                             VelocityAxisY += ACCELERATION_AIR_X_AXIS;
                         EntityDirection = false;
                         break;
@@ -193,17 +193,19 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        private void SlowVelocityRight()                    //Slow down acceleration
+        private void SlowVelocityRight(int limit)                    //Slow down acceleration
         {
             if ((LevelDimention == 0 || LevelDimention == 2) && VelocityAxisX > SlowDownLimit)
             {
-                VelocityAxisX -= ACCELERATION_X_AXIS;
+                if(VelocityAxisX > limit)
+                    VelocityAxisX -= ACCELERATION_X_AXIS;
                 if (VelocityAxisX < 0)
                     VelocityAxisX = 0;
                 EntityDirection = false;
             }
             else if (VelocityAxisY < -SlowDownLimit)
             {
+                if(VelocityAxisY < -limit)
                 VelocityAxisY += ACCELERATION_X_AXIS;
                 if (VelocityAxisY > 0)
                     VelocityAxisY = 0;
@@ -211,18 +213,20 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        private void SlowVelocityLeft()                     // Slow down acceleration
+        private void SlowVelocityLeft(int limit)                     // Slow down acceleration
         {
             if ((LevelDimention == 0 || LevelDimention == 2) && VelocityAxisX < -SlowDownLimit)
             {
-                VelocityAxisX += ACCELERATION_X_AXIS;
+                if(VelocityAxisX < -limit)
+                    VelocityAxisX += ACCELERATION_X_AXIS;
                 if (VelocityAxisX > 0)
                     VelocityAxisX = 0;
                 EntityDirection = true;
             }
             else if (VelocityAxisY > SlowDownLimit)
             {
-                VelocityAxisY -= ACCELERATION_X_AXIS;
+                if(VelocityAxisY > limit)
+                    VelocityAxisY -= ACCELERATION_X_AXIS;
                 if (VelocityAxisY < 0)
                     VelocityAxisY = 0;
                 EntityDirection = false;
@@ -312,33 +316,42 @@ namespace CorridorGravity.GameLogic
 
             // #########   END  ###########
 
+            // Slow during attack
+            var velocityLimit = 0;
+            var slowStrikeFlag = GetPLayerStrikeStatus();
+
+            if (slowStrikeFlag && IsGrounded())
+                velocityLimit = (int)VELOCITY_LIMIT_X_AXIS - 120;
+
             if (rightState && IsAlive)                                                                         // Right Acceleration
-            {
+            { 
                 if (LevelDirection == 1)                // if InverseAxisDirections was applyed
-                    IncreaseVelocityRight();
+                    IncreaseVelocityRight(velocityLimit);
                 else
-                    IncreaseVelocityLeft();
+                    IncreaseVelocityLeft(velocityLimit);
+
             }
             if (leftState && IsAlive)                                                                          // Left Acceleration
-            {
+            { 
                 if (LevelDirection == 1)                // if InverseAxisDirections was applyed
-                    IncreaseVelocityLeft();
+                    IncreaseVelocityLeft(velocityLimit);
                 else
-                    IncreaseVelocityRight();
+                    IncreaseVelocityRight(velocityLimit);
+
             }
-            if (IsGrounded() && !rightState)                                                // Right SlowDown
+            if (IsGrounded() && (!rightState || slowStrikeFlag))                                                // Right SlowDown
             {
                 if (LevelDirection == 1)
-                    SlowVelocityRight();
+                    SlowVelocityRight(velocityLimit);
                 else
-                    SlowVelocityLeft();
+                    SlowVelocityLeft(velocityLimit);
             }
-            if (IsGrounded() && !leftState)                                                 // Left SlowDown
+            if (IsGrounded() && (!leftState || slowStrikeFlag))                                                 // Left SlowDown
             {
                 if (LevelDirection == 1)
-                    SlowVelocityLeft();
+                    SlowVelocityLeft(velocityLimit);
                 else
-                    SlowVelocityRight();
+                    SlowVelocityRight(velocityLimit);
             }
 
             var dimentionVelocity = 0f;                         // Velocity to check, is could jump or.. "the gravity is too strong in this one"
@@ -607,7 +620,7 @@ namespace CorridorGravity.GameLogic
                     IsOnceAnimated = CurrentAnimation.UpdateSingleAnimationIsEnded(gameTime);
                 if (!IsOnceAnimated)
                     OnceAnimationType = -1;
-                if (!IsAlive && OnceAnimationType == -1) 
+                if (!IsOnceAnimated && !IsAlive) 
                     IsDead = true; 
             }
         }
@@ -701,11 +714,6 @@ namespace CorridorGravity.GameLogic
                 StepForHealthBar += 44;
             }
 
-        }
-
-        public override void Touch()
-        {
-
-        }
+        } 
     }
 } 
