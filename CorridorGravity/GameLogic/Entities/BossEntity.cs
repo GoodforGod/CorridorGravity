@@ -23,7 +23,7 @@ namespace CorridorGravity.GameLogic
         public float PlayerX { get; set; }
         public float PlayerY { get; set; }
 
-        private float TransparentPower = 1f;
+        private float TransparentPower = 0.01f;
         private float TransparentInc = 0.005f; 
         private float SummonVelocity = 4.8f;
 
@@ -34,6 +34,7 @@ namespace CorridorGravity.GameLogic
         private int LevelHeight { get; set; }
         private int LevelWidth { get; set; }
 
+        public bool IntroFlag { get; set; }
         public bool IsSpawned { get; set; }
         public bool IsReadyToSpawn { get; set; }
         public bool IsOnceAnimated { get; set; }
@@ -44,6 +45,7 @@ namespace CorridorGravity.GameLogic
         public bool IsSummoned { get; set; }
         public bool SummonDirection { get; set; }
 
+        public long PlayerScore = 1;
         public int FutureDimention { get; set; }
         public int LevelDimention { get; set; }
         public int LevelDirection { get; set; }    // 1 - Correct direction, -1 - inverse
@@ -218,7 +220,12 @@ namespace CorridorGravity.GameLogic
         }
         
         private void UpdateSummonFistVelocity()
-        { 
+        {
+            var playerScoreInc = PlayerScore;
+
+            if (SummonVelocity < 0)
+                playerScoreInc = -PlayerScore;
+
             switch (LevelDimention)
             {
                 case 0:
@@ -226,14 +233,14 @@ namespace CorridorGravity.GameLogic
                     if (SummonVelocity > 0)
                     {
                         if (SummonX < LevelWidth)
-                            SummonX += SummonVelocity;
+                            SummonX += SummonVelocity + playerScoreInc / 100;
                         else
                             IsSummoned = false;
                     }
                     else
                     {
                         if (SummonX > 0)
-                            SummonX += SummonVelocity;
+                            SummonX += SummonVelocity + playerScoreInc / 100;
                         else
                             IsSummoned = false;
                     }
@@ -243,14 +250,14 @@ namespace CorridorGravity.GameLogic
                     if (SummonVelocity > 0)
                     {
                         if (SummonY < LevelHeight)
-                            SummonY += SummonVelocity;
+                            SummonY += SummonVelocity + playerScoreInc / 100;
                         else
                             IsSummoned = false;
                     }
                     else
                     {
                         if (SummonY > 0)
-                            SummonY += SummonVelocity;
+                            SummonY += SummonVelocity + playerScoreInc / 100;
                         else
                             IsSummoned = false;
                     }
@@ -467,10 +474,10 @@ namespace CorridorGravity.GameLogic
                                                             AnimationsPack.EyeBlackPart, TintColor * TransparentPower, 
                                                                 rotationAngle, new Vector2(1, 1), .7f, effectsApplyed, .0f);
 
-
                 // Boss body
-                batcher.Draw(EntitySprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, TintColor * TransparentPower,
-                                            rotationAngle, new Vector2(1, 1), .7f, effectsApplyed, .0f);
+                if (!IntroFlag)
+                    batcher.Draw(EntitySprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, TintColor * TransparentPower,
+                                                rotationAngle, new Vector2(1, 1), .7f, effectsApplyed, .0f);
 
                 
 

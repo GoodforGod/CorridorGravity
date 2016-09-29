@@ -24,6 +24,8 @@ namespace CorridorGravity
         private const int FRAME_SCORE_OFFSET = 40;
         private bool IsPaused { get; set; }
         private bool ButtonFlag { get; set; }
+        private bool IntroFlag = true;
+        private bool DelayFlag = true;
 
         private float TransparentPower = 0.05f;
         private float TransparentInc = 0.01f;
@@ -31,14 +33,23 @@ namespace CorridorGravity
         private float BossRespawnTimeInSeconds;
         private Random LocationRandomizer;
         private int NextScoreGoal = 200;
-        private const int ScoreStep = 1000;
+        private const int ScoreStep = 100;
 
         private const string ENTITY_PLAYER = "player-2-white-1";
-        private const string ENTITY_WORLD = "world-background-score";
         private const string ENTITY_ENEMY = "skeleton";
         private const string ENTITY_BOSS = "magolor-soul-white";
         private const string ENTITY_MAGIC = "magic-white";
-        private const string ENTITY_PILL = "pill-white";
+
+        private const string TEXTURE_WORLD = "world-background-score";
+        private const string TEXTURE_PILL = "pill-white";
+        private const string TEXTURE_INTRO = "intro";
+        private const string TEXTURE_PAUSE = "world-paused";
+        private const string TEXTURE_DEAD = "world-dead";
+        private const string TEXTURE_NAME = "intro-name";
+
+
+        private const string FONT_SCORE = "score-font";
+        private const string SONG_BACKGROUND = "joshuaempyre-arcade-music-loop"; 
 
         List<MagicEntity> MagicList;
         List<EnviromentEntity> EnvList;
@@ -46,7 +57,13 @@ namespace CorridorGravity
         List<EnemyEntity> KillList;
 
         // For now player one, soooooooo... Wait for multiplayer.. 
-         
+        Texture2D IntroTexture;
+        Texture2D DeadTexture;
+        Texture2D PauseTexture;
+        Texture2D NameTexture;
+
+        DateTime DelayTime;
+
         PlayerEntity Player;
         WorldEntity World;
         BossEntity Boss;
@@ -67,11 +84,8 @@ namespace CorridorGravity
         /// and initialize them as well.
         /// </summary>
         
-        private void InitWorld()
-        {
-            World = new WorldEntity(Content, ENTITY_WORLD, FRAME_WIDTH, FRAME_HEIGHT);
-            World.Init();
-
+        private void InitCreatures()
+        {  
             MagicEntity Magic_1 = new MagicEntity(Content, ENTITY_MAGIC, FRAME_HEIGHT, FRAME_WIDTH);
             Magic_1.UpdateAndRelocate(206, 188, 0);
             MagicList.Add(Magic_1);
@@ -115,13 +129,15 @@ namespace CorridorGravity
             EnemyList = new List<EnemyEntity>();
             KillList = new List<EnemyEntity>();
 
-            InitWorld();
+
+            World = new WorldEntity(Content, TEXTURE_WORLD, FRAME_WIDTH, FRAME_HEIGHT);
+            World.Init();
+
+            InitCreatures();
 
             InitEnviroment();
 
             InitCharacter();
-
-            CreateEnemy(World.LevelHeight/2, World.LevelWidth/2, true);
 
             base.Initialize();
         }
@@ -135,8 +151,13 @@ namespace CorridorGravity
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice); 
 
-            StatusFont = Content.Load<SpriteFont>("score-font");
-            BackgroundSong = Content.Load<Song>("joshuaempyre-arcade-music-loop");
+            StatusFont = Content.Load<SpriteFont>(FONT_SCORE);
+            BackgroundSong = Content.Load<Song>(SONG_BACKGROUND);
+
+            NameTexture = Content.Load<Texture2D>(TEXTURE_NAME);
+            IntroTexture = Content.Load<Texture2D>(TEXTURE_INTRO);
+            DeadTexture = Content.Load<Texture2D>(TEXTURE_DEAD);
+            PauseTexture = Content.Load<Texture2D>(TEXTURE_PAUSE);
 
             MediaPlayer.Play(BackgroundSong);
             MediaPlayer.IsRepeating = true;
@@ -261,108 +282,133 @@ namespace CorridorGravity
             // Check if active, if not, pause game
             if (IsActive)
             {
-
-                // Check for pause input  
-                if (Keyboard.GetState().IsKeyDown(Keys.P) && ButtonFlag)
+                if (!IntroFlag)
                 {
-                    ButtonFlag = false;
-                    IsPaused = !IsPaused;
+                    // Check for pause input  
+                    if (Keyboard.GetState().IsKeyDown(Keys.P) && ButtonFlag)
+                    {
+                        ButtonFlag = false;
+                        IsPaused = !IsPaused;
 
-                    if (IsPaused)
-                        MediaPlayer.Pause();
-                    else MediaPlayer.Resume();
+                        if (IsPaused)
+                            MediaPlayer.Pause();
+                        else MediaPlayer.Resume();
+                    }
+                    if (Keyboard.GetState().IsKeyUp(Keys.P))
+                        ButtonFlag = true;
+
+                    if(DelayFlag)
+                    {
+                        if ((DateTime.Now - DelayTime).TotalSeconds > 6)
+                            DelayFlag = false;
+                    }
+
+                    // If not paused
+                    if (!IsPaused && IsActive)
+                    {
+                        //Boss
+                        if (!DelayFlag)
+                        {
+                            Boss.PlayerX = Player.X;
+                            Boss.PlayerY = Player.Y;
+                            Boss.PlayerScore = Player.ScoreCount;
+                            //Boss.LevelDimention = Player.LevelDimention;
+                            Boss.Update(gameTime);
+
+                            if (Boss.IsDead)
+                                Player.LevelDimention = Boss.LevelDimention;
+
+                            if (Boss.IsDead && Boss.IsReadyToSpawn && (DateTime.Now - Boss.DeadTime).TotalSeconds > BossRespawnTimeInSeconds)   // Relocate when time is up    
+                            {
+                                // Spawn boss when time has come
+                                Boss.IsReadyToSpawn = false;
+                                Boss.IsDead = false;
+                                RelocateBoss(Boss);
+                            }
+                            else if (!Boss.IsReadyToSpawn && Boss.IsDead)
+                            {
+                                // Set boss next spawn time
+                                Boss.IsReadyToSpawn = true;
+                                BossRespawnTimeInSeconds = LocationRandomizer.Next(1, 3);
+                                BossRespawnTimeInSeconds -= Player.ScoreCount / 1000;
+                                if (BossRespawnTimeInSeconds < 2)
+                                    BossRespawnTimeInSeconds = 2;
+                            }
+
+                            // Magic Updates
+                            foreach (var magic in MagicList)
+                            {
+                                magic.Update(gameTime);
+                                if (!magic.IsAlive)
+                                {
+                                    // Start respawn timer, if dead
+                                    if (!magic.IsDead)
+                                    {
+                                        magic.DeadTime = DateTime.Now;
+                                        magic.IsDead = true;
+                                        PortalRespawnTimeInSeconds = LocationRandomizer.Next(2, 9);
+                                        PortalRespawnTimeInSeconds -= Player.ScoreCount / 1000;
+                                        if (PortalRespawnTimeInSeconds < 1)
+                                            PortalRespawnTimeInSeconds = 1;
+                                    }
+                                    else if ((DateTime.Now - magic.DeadTime).TotalSeconds > PortalRespawnTimeInSeconds)
+                                    {
+                                        // Relocate when time has come   
+                                        magic.IsDead = false;
+                                        RelocatePortal(magic);
+                                    }
+                                }
+                                else magic.LevelDimention = Boss.LevelDimention;
+
+                                // Portal spawns enemies
+                                if (magic.IsReadyToSpawn && !magic.IsSpawned && magic.IsAlive)
+                                {
+                                    magic.IsSpawned = true;
+                                    CreateEnemy(magic.X - 30, magic.Y + 20, true);
+                                }
+                            }
+                        }
+                        // Characters Updates
+                        Player.Update(gameTime);
+
+                        if (!DelayFlag)
+                        {
+                            //Enemy Update 
+                            foreach (var enemy in EnemyList)
+                            {
+                                if (!enemy.IsDead)
+                                {
+                                    enemy.LevelDimention = Player.LevelDimention;
+                                    enemy.LevelDirection = Player.LevelDirection;
+                                    enemy.PlayerX = Player.X;
+                                    enemy.PlayerY = Player.Y;
+                                    enemy.Update(gameTime);
+                                }
+                            }
+
+                            // Chekc for collision
+                            CollideAllEntities();
+
+                            //Spawn more portals
+                            if (Player.ScoreCount > NextScoreGoal)
+                            {
+                                MagicList.Add(new MagicEntity(Content, ENTITY_MAGIC, FRAME_HEIGHT, FRAME_WIDTH));
+                                NextScoreGoal += ScoreStep;
+                            }
+                        }
+
+                    }
                 }
-                if (Keyboard.GetState().IsKeyUp(Keys.P))
-                    ButtonFlag = true; 
-
-                // If not paused
-                if (!IsPaused && IsActive)
+                else
                 {
-                    //Boss
-                    Boss.PlayerX = Player.X;
-                    Boss.PlayerY = Player.Y;
-                    //Boss.LevelDimention = Player.LevelDimention;
-                    Boss.Update(gameTime);
-
-                    if (Boss.IsDead)
-                        Player.LevelDimention = Boss.LevelDimention;
-
-                    if (Boss.IsDead && Boss.IsReadyToSpawn && (DateTime.Now - Boss.DeadTime).TotalSeconds > BossRespawnTimeInSeconds)   // Relocate when time is up    
+                    if (Keyboard.GetState().IsKeyDown(Keys.Space) && ButtonFlag)
                     {
-                        // Spawn boss when time has come
-                        Boss.IsReadyToSpawn = false;
-                        Boss.IsDead = false;
-                        RelocateBoss(Boss);
+                        ButtonFlag = false;
+                        IntroFlag = false;
+                        DelayTime = DateTime.Now;
                     }
-                    else if (!Boss.IsReadyToSpawn && Boss.IsDead)
-                    {
-                        // Set boss next spawn time
-                        Boss.IsReadyToSpawn = true;
-                        BossRespawnTimeInSeconds = LocationRandomizer.Next(1, 3);
-                        BossRespawnTimeInSeconds -= Player.ScoreCount / 1000;
-                        if (BossRespawnTimeInSeconds < 2)
-                            BossRespawnTimeInSeconds = 2;
-                    }
-
-                    // Magic Updates
-                    foreach (var magic in MagicList)
-                    {
-                        magic.Update(gameTime);
-                        if (!magic.IsAlive)
-                        {
-                            // Start respawn timer, if dead
-                            if (!magic.IsDead)
-                            {
-                                magic.DeadTime = DateTime.Now;
-                                magic.IsDead = true;
-                                PortalRespawnTimeInSeconds = LocationRandomizer.Next(2, 9);
-                                PortalRespawnTimeInSeconds -= Player.ScoreCount / 1000;
-                                if (PortalRespawnTimeInSeconds < 1)
-                                    PortalRespawnTimeInSeconds = 1;
-                            }
-                            else if ((DateTime.Now - magic.DeadTime).TotalSeconds > PortalRespawnTimeInSeconds)
-                            {
-                                // Relocate when time has come   
-                                magic.IsDead = false;
-                                RelocatePortal(magic);
-                            }
-                        }
-                        else magic.LevelDimention = Boss.LevelDimention;
-
-                        // Portal spawns enemies
-                        if (magic.IsReadyToSpawn && !magic.IsSpawned && magic.IsAlive)
-                        {
-                            magic.IsSpawned = true;
-                            //CreateEnemy(magic.X - 30, magic.Y + 20, true);
-                        }
-                    }
-
-                    // Characters Updates
-                    Player.Update(gameTime);
-
-                    //Enemy Update 
-                    foreach (var enemy in EnemyList)
-                    {
-                        if (!enemy.IsDead)
-                        {
-                            enemy.LevelDimention = Player.LevelDimention;
-                            enemy.LevelDirection = Player.LevelDirection;
-                            enemy.PlayerX = Player.X;
-                            enemy.PlayerY = Player.Y;
-                            enemy.Update(gameTime);
-                        }
-                    }
-
-                    // Chekc for collision
-                    CollideAllEntities();
-
-                    //Spawn more portals
-                    if (Player.ScoreCount > NextScoreGoal)
-                    {
-                        MagicList.Add(new MagicEntity(Content, ENTITY_MAGIC, FRAME_HEIGHT, FRAME_WIDTH));
-                        NextScoreGoal += ScoreStep;
-                    }
-
+                    if (Keyboard.GetState().IsKeyUp(Keys.Space))
+                        ButtonFlag = true;
                 }
             }
             else
@@ -386,49 +432,54 @@ namespace CorridorGravity
             // If window is active
             if (IsActive)
             {
-                // Background
-                World.Draw(spriteBatch);
-
-                //Enviroment
-                //foreach (var env in EnvList)
-                //    env.Draw(spriteBatch);
-
-
-                //Magic
-                foreach (var magic in MagicList)
-                    magic.Draw(spriteBatch);
-
-                //Boss
-                Boss.Draw(spriteBatch);
-
-                //Characters
-                Player.Draw(spriteBatch);  
-
-                //Enemies
-                foreach (var enemy in EnemyList)
-                    if (!enemy.IsDead)
-                        enemy.Draw(spriteBatch);
-
-                // Pause
-                if (IsPaused)
+                if (!IntroFlag)
                 {
-                    var rect = new Texture2D(GraphicsDevice, 1, 1);
-                    rect.SetData(new[] { Color.Black });
-                    spriteBatch.Draw(rect, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
-                        Color.Black * 0.3f, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, .5f);
-                } 
+                    // Background
+                    World.Draw(spriteBatch);
 
-                if(Player.IsDead)
+                    //Enviroment
+                    //foreach (var env in EnvList)
+                    //    env.Draw(spriteBatch);
+
+
+                    //Magic
+                    foreach (var magic in MagicList)
+                        magic.Draw(spriteBatch);
+
+                    //Boss
+                    Boss.Draw(spriteBatch);
+
+                    //Characters
+                    Player.Draw(spriteBatch);
+
+                    //Enemies
+                    foreach (var enemy in EnemyList)
+                        if (!enemy.IsDead)
+                            enemy.Draw(spriteBatch);
+
+                    // Pause
+                    if (IsPaused)
+                    { 
+                        spriteBatch.Draw(PauseTexture, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
+                            Color.Black * 0.3f, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, .5f);
+                    }
+
+                    if (Player.IsDead)
+                    { 
+                        spriteBatch.Draw(DeadTexture, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
+                            Color.Black * TransparentPower, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, TransparentPower);
+
+                        if (TransparentPower < .99f)
+                            TransparentPower += TransparentInc;
+                    }
+                }
+                else
                 {
-                    var rect = new Texture2D(GraphicsDevice, 1, 1);
-                    rect.SetData(new[] { Color.Black });
-                    spriteBatch.Draw(rect, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT),
-                        Color.Black * TransparentPower, 0f, new Vector2(1, 1), 5f, SpriteEffects.None, TransparentPower);
+                    spriteBatch.Draw(IntroTexture, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT), Color.White,
+                        0f, new Vector2(1, 1), 1f, SpriteEffects.None, 1f);
 
-                    spriteBatch.DrawString(StatusFont, "DEAD", new Vector2(FRAME_WIDTH / 2, FRAME_HEIGHT / 2), Color.Red);
-
-                    if(TransparentPower < .99f)
-                        TransparentPower += TransparentInc;
+                    spriteBatch.Draw(NameTexture, new Vector2(0, 0), new Rectangle(0, 0, FRAME_WIDTH, FRAME_HEIGHT), Color.White,
+                        0f, new Vector2(1, 1), 1f, SpriteEffects.None, 1f);
                 }
             }
 

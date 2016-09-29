@@ -313,7 +313,7 @@ namespace CorridorGravity.GameLogic
 
             // Test code section BEGIN ####
 
-            TestGravityCollapce();
+            //TestGravityCollapce();
 
             // #########   END  ###########
 

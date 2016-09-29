@@ -68,8 +68,8 @@ namespace CorridorGravity.GameLogic
             AnimationsPack = new Enemy();
             CurrentAnimation = AnimationsPack.Idle;
             IsAlive = true;
-            this.Y = X;
-            this.X = Y;
+            this.Y = Y;
+            this.X = X;
             LevelDimention = 0;
             LevelDirection = 1;
             this.EntityDirection = EntityDirection;
