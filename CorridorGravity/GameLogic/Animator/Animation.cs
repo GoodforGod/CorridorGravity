@@ -39,8 +39,11 @@ namespace CorridorGravity.GameLogic
             }
             double secondsIntoAnimation =
                 TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
-
+            
             double remainder = secondsIntoAnimation % Duration.TotalSeconds;
+
+            if (remainder == double.NaN || Duration.TotalSeconds == 0)
+                remainder = 0;
 
             TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
 

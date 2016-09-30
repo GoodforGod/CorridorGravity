@@ -11,6 +11,7 @@ namespace CorridorGravity.GameLogic
     class EnemyEntity : Entity
     {
         private static Color TintColor = Color.White;
+        public DateTime LastHitTime = DateTime.Now;
 
         public override float X { get; set; }
         public override float Y { get; set; }
@@ -31,6 +32,7 @@ namespace CorridorGravity.GameLogic
         public const int ENTITY_WIDTH = 44; 
         private const int LEVEL_OFFSET_HEIGHT = 20;
         private const int DISTANCE_BETWEEN_ENTITIES = 105;
+        private const int SCORE_VELOCITY_LIMIT = 10;
 
         private const float JUMP_POWER = 450f;
         private const float VELOCITY_AIR_LIMIT_X_AXIS = 40f;
@@ -47,8 +49,10 @@ namespace CorridorGravity.GameLogic
         public bool EntityDirection { get; set; }           // Direction of animation, false - Animation direction right, true - left
         public bool IsAlive { get; set; }
         public bool IsDead { get; set; }
-        public bool IsAttacked { get; set; } 
-        
+        public bool IsAttacked { get; set; }
+        public float RotationAngle = .0f;
+        public long PlayerScore { get; set; }
+
         private int LevelHeight { get; set; }
         private int LevelWidth { get; set; }
         public int LevelDirection { get; set; }       // 1 - Correct direction, -1 - inverse
@@ -64,6 +68,7 @@ namespace CorridorGravity.GameLogic
             LevelHeight = levelHeight - LEVEL_OFFSET_HEIGHT;
             LevelWidth = levelWidth;
 
+            PlayerScore = 1;
             MagicAnimationPack = new Magic(content);
             AnimationsPack = new Enemy();
             CurrentAnimation = AnimationsPack.Idle;
@@ -94,12 +99,12 @@ namespace CorridorGravity.GameLogic
                 {
                     case 0:
                     case 2:
-                        if (VelocityAxisX < VELOCITY_LIMIT_X_AXIS)
+                        if (VelocityAxisX < VELOCITY_LIMIT_X_AXIS + PlayerScore / SCORE_VELOCITY_LIMIT)
                             VelocityAxisX += ACCELERATION_X_AXIS; 
                         break;
                     case 1:
                     case 3:
-                        if (VelocityAxisY > -VELOCITY_LIMIT_X_AXIS)
+                        if (VelocityAxisY > -VELOCITY_LIMIT_X_AXIS - PlayerScore / SCORE_VELOCITY_LIMIT)
                             VelocityAxisY -= ACCELERATION_X_AXIS; 
                         break;
                     default: break;
@@ -112,12 +117,12 @@ namespace CorridorGravity.GameLogic
                 {
                     case 0:
                     case 2:
-                        if (VelocityAxisX < VELOCITY_AIR_LIMIT_X_AXIS)
+                        if (VelocityAxisX < VELOCITY_AIR_LIMIT_X_AXIS + PlayerScore / SCORE_VELOCITY_LIMIT)
                             VelocityAxisX += ACCELERATION_AIR_X_AXIS; 
                         break;
                     case 1:
                     case 3:
-                        if (VelocityAxisY > -VELOCITY_AIR_LIMIT_X_AXIS)
+                        if (VelocityAxisY > -VELOCITY_AIR_LIMIT_X_AXIS - PlayerScore / SCORE_VELOCITY_LIMIT)
                             VelocityAxisY -= ACCELERATION_AIR_X_AXIS; 
                         break;
                     default: break;
@@ -133,12 +138,12 @@ namespace CorridorGravity.GameLogic
                 {
                     case 0:
                     case 2:
-                        if (VelocityAxisX > -VELOCITY_LIMIT_X_AXIS)
+                        if (VelocityAxisX > -VELOCITY_LIMIT_X_AXIS - PlayerScore / SCORE_VELOCITY_LIMIT)
                             VelocityAxisX -= ACCELERATION_X_AXIS; 
                         break;
                     case 1:
                     case 3:
-                        if (VelocityAxisY < VELOCITY_LIMIT_X_AXIS)
+                        if (VelocityAxisY < VELOCITY_LIMIT_X_AXIS + PlayerScore / SCORE_VELOCITY_LIMIT)
                             VelocityAxisY += ACCELERATION_X_AXIS; 
                         break;
                     default: break;
@@ -151,12 +156,12 @@ namespace CorridorGravity.GameLogic
                 {
                     case 0:
                     case 2:
-                        if (VelocityAxisX > -VELOCITY_AIR_LIMIT_X_AXIS)
+                        if (VelocityAxisX > -VELOCITY_AIR_LIMIT_X_AXIS - PlayerScore / SCORE_VELOCITY_LIMIT)
                             VelocityAxisX -= ACCELERATION_AIR_X_AXIS; 
                         break;
                     case 1:
                     case 3:
-                        if (VelocityAxisY < VELOCITY_AIR_LIMIT_X_AXIS)
+                        if (VelocityAxisY < VELOCITY_AIR_LIMIT_X_AXIS + PlayerScore / SCORE_VELOCITY_LIMIT)
                             VelocityAxisY += ACCELERATION_AIR_X_AXIS; 
                         break;
 
@@ -500,35 +505,29 @@ namespace CorridorGravity.GameLogic
 
         public override void Draw(SpriteBatch batcher)
         {
-            SpriteEffects effectsApplyed = SpriteEffects.None;
-
-            var rotationAngle = .0f;
+            SpriteEffects effectsApplyed = SpriteEffects.None; 
 
             switch (LevelDimention)                             // Choose sprite flip, depend on the current dimention
             {
-                case 0:
-                    rotationAngle = .0f;
+                case 0: 
                     if (!EntityDirection)
                         effectsApplyed = SpriteEffects.FlipHorizontally;
                     else effectsApplyed = SpriteEffects.None;
                     break;
 
-                case 1:
-                    rotationAngle = 1.571f;
+                case 1: 
                     if (EntityDirection)
                         effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
                     else effectsApplyed = SpriteEffects.FlipVertically;
                     break;
 
-                case 2:
-                    rotationAngle = .0f;
+                case 2: 
                     if (!EntityDirection)
                         effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
                     else effectsApplyed = SpriteEffects.FlipVertically;
                     break;
 
-                case 3:
-                    rotationAngle = 1.571f;
+                case 3: 
                     if (EntityDirection)
                         effectsApplyed = SpriteEffects.FlipHorizontally;
                     else effectsApplyed = SpriteEffects.None;
@@ -541,10 +540,10 @@ namespace CorridorGravity.GameLogic
                 batcher.Draw(EntitySprite, new Vector2(X, Y), new Rectangle(0, 0, 1, 1), TintColor); 
             else if (OnceAnimationType == 4) 
                 batcher.Draw(MagicAnimationPack.MagicSprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, 
-                                 TintColor * TransparentPower, rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f); 
+                                 TintColor * TransparentPower, RotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f); 
             else if (IsAlive)
                 batcher.Draw(EntitySprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, TintColor,
-                                            rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f); 
+                                            RotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f); 
         } 
     }
 }

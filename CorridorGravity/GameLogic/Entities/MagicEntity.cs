@@ -38,6 +38,7 @@ namespace CorridorGravity.GameLogic
 
         public MagicEntity(ContentManager content, string contentName, int levelHeight, int levelWidth)
         {
+            CurrentAnimation = new Animation();
             LevelHeight = levelHeight / 2;
             LevelWidth = levelWidth / 2;
             AnimationsPack = new Magic(content);

@@ -32,13 +32,16 @@ namespace CorridorGravity.GameLogic
         private const float VELOCITY_LIMIT_Y_AXIS = 180f;
         private const float ACCELERATION_AIR_X_AXIS = 3f;
         private const float ACCELERATION_X_AXIS = 85f;
-        private const float GRAVITY_POWER = -9.8f; 
-         
+        private const float GRAVITY_POWER = -9.8f;
+        private const float ROTATION_ANGLE_LIMIT = 1.570f;
+
         public bool IsAlive { get; set; }
         public bool IsDead { get; set; }
         private bool IsOnceAnimated { get; set; }
         public bool IsOnSrike { get; set; }
-
+         
+        public float RotationAngleInc = 0.157f;
+        public float RotationAngle = .0f;
         public long ScoreCount { get; set; }
         public int HealthCount { get; set; }
         private int DoubleJumpFlag = 0;
@@ -77,6 +80,7 @@ namespace CorridorGravity.GameLogic
             LevelWidth = levelWidth;
             LevelDirection = 1;
             LevelDimention = 0;
+            LastHitTime = new DateTime();
 
             Y = LevelHeight - ENTITY_HEIGHT - 1;
             X = LevelWidth / 2;
@@ -628,35 +632,41 @@ namespace CorridorGravity.GameLogic
 
         public override void Draw(SpriteBatch batcher)
         {
-            SpriteEffects effectsApplyed = SpriteEffects.None;
-
-            var rotationAngle = .0f;
+            SpriteEffects effectsApplyed = SpriteEffects.None; 
 
             switch (LevelDimention)                             // Choose sprite flip, depend on the current dimention
             {
                 case 0:
-                    rotationAngle = .0f;
+                    if (RotationAngle <= ROTATION_ANGLE_LIMIT && RotationAngle > 0)
+                        RotationAngle -= RotationAngleInc;
+                    else RotationAngle = 0;
                     if (EntityDirection)
                         effectsApplyed = SpriteEffects.FlipHorizontally;
                     else effectsApplyed = SpriteEffects.None;
                     break;
 
                 case 1:
-                    rotationAngle = 1.571f;
+                    if (RotationAngle >= 0 && RotationAngle < ROTATION_ANGLE_LIMIT)
+                        RotationAngle += RotationAngleInc;
+                    else RotationAngle = ROTATION_ANGLE_LIMIT;
                     if (EntityDirection)
                         effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
                     else effectsApplyed = SpriteEffects.FlipVertically;
                     break;
 
                 case 2:
-                    rotationAngle = .0f;
+                    if (RotationAngle <= ROTATION_ANGLE_LIMIT && RotationAngle > 0)
+                        RotationAngle -= RotationAngleInc;
+                    else RotationAngle = 0;
                     if (EntityDirection)
                         effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
                     else effectsApplyed = SpriteEffects.FlipVertically;
                     break;
 
                 case 3:
-                    rotationAngle = 1.571f;
+                    if (RotationAngle >= 0 && RotationAngle < ROTATION_ANGLE_LIMIT)
+                        RotationAngle += RotationAngleInc;
+                    else RotationAngle = ROTATION_ANGLE_LIMIT;
                     if (EntityDirection)
                         effectsApplyed = SpriteEffects.FlipHorizontally;
                     else effectsApplyed = SpriteEffects.None;
@@ -671,7 +681,7 @@ namespace CorridorGravity.GameLogic
 
             if (IsDead)
                 batcher.Draw(EntitySprite, new Vector2(StrikeCoordX, StrikeCoordY), new Rectangle(430, 130, 78, 90), TintColor,
-                                            rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
+                                            RotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
             else
             { 
                 if (CurrentAnimation == AnimationsPack.StrikeTwo)
@@ -698,15 +708,12 @@ namespace CorridorGravity.GameLogic
                 }
                 // Entity draw
                 batcher.Draw(EntitySprite, new Vector2(StrikeCoordX, StrikeCoordY), CurrentAnimation.CurrentRectangle, TintColor,
-                                            rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
+                                            RotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
             }
             // Portrait draw
-            batcher.Draw(EntitySprite, new Vector2(LevelWidth - LEVEL_OFFSET_HEIGHT * 2, LevelHeight), AnimationsPack.Portrait.CurrentRectangle, Color.Beige,
+            batcher.Draw(EntitySprite, new Vector2(LevelWidth - LEVEL_OFFSET_HEIGHT * 2, LevelHeight + 10), AnimationsPack.Portrait.CurrentRectangle, Color.Beige,
                             0f, new Vector2(1, 1), 1f, SpriteEffects.None, .0f);
-
-            // Draw Scores
-            batcher.DrawString(ScoreFont, "Score: " + ScoreCount.ToString(), new Vector2(LevelWidth - LEVEL_OFFSET_HEIGHT*10, LevelHeight), TintColor);
-
+            
             // Health bar draw
             for(int i = 0; i < HealthCount; i++)
             { 
