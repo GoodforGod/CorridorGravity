@@ -38,7 +38,7 @@ namespace CorridorGravity
         private const int FRAME_HEIGHT = 768;
         private const int FRAME_SCORE_OFFSET = 40;
 
-        private const string ENTITY_PLAYER = "player-2-white-1";
+        private const string ENTITY_PLAYER = "player-2-white-3";
         private const string ENTITY_ENEMY = "skeleton";
         private const string ENTITY_BOSS = "magolor-soul-white";
         private const string ENTITY_MAGIC = "magic-white";
@@ -90,6 +90,8 @@ namespace CorridorGravity
             graphics.PreferredBackBufferHeight = FRAME_HEIGHT;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
+            this.Window.Position = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width/2 - FRAME_WIDTH/2, 
+                                            GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height/2 - FRAME_HEIGHT/2);
         }
 
         /// <summary>
@@ -281,7 +283,7 @@ namespace CorridorGravity
                                                         Boss.SummonRuneAnimation.CurrentRectangle.Width,
                                                             Boss.SummonRuneAnimation.CurrentRectangle.Height);
 
-                        if (Player.IsAlive && (DateTime.Now - spell.LastHitTime).TotalSeconds > 1 
+                        if (Player.IsAlive && !Player.IsUsingUltimate && (DateTime.Now - spell.LastHitTime).TotalSeconds > 1 
                                         &&  CheckOnTouch(new Rectangle((int)Player.X, (int)Player.Y, Player.GetEntityWidth(), Player.GetEntityHeight()),
                                                 collideRectangle))
                         {
@@ -300,7 +302,7 @@ namespace CorridorGravity
                     if (CheckOnTouch(new Rectangle((int)Player.X, (int)Player.Y,
                                                         Player.GetEntityWidth(), Player.GetEntityHeight()),
                                                   new Rectangle((int)enemy.X, (int)enemy.Y,
-                                                        enemy.GetEntityWidth(), enemy.GetEntityHeight())))
+                                                        enemy.EntityWidth, enemy.EntityHeight)))
                     {
                         // Kill enemy, if player attacked and was collision
                         if (Player.GetPLayerStrikeStatus())               
@@ -327,6 +329,55 @@ namespace CorridorGravity
             KillList.Clear();
         }
         
+        private void CheckPauseFlag()
+        {
+            if (Keyboard.GetState().IsKeyDown(Keys.P) && ButtonFlag)
+            {
+                ButtonFlag = false;
+                IsPaused = !IsPaused;
+
+                if (IsPaused)
+                    MediaPlayer.Pause();
+                else MediaPlayer.Resume();
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.P))
+                ButtonFlag = true;
+        }
+
+        private void ChangeSongOnGameState()
+        {
+            if (DelayFlag)
+            {
+                if ((DateTime.Now - DelayTime).TotalSeconds > 6)
+                    DelayFlag = false;
+            }
+            else if (SongFlag)
+            {
+                SongFlag = false;
+                MediaPlayer.Volume = 0f;
+                MediaPlayer.Play(BackgroundSong);
+                MediaPlayer.IsRepeating = true;
+            }
+            else if (MediaPlayer.Volume < 1f && !SongFlag && !Player.IsDead)
+                MediaPlayer.Volume += 0.003f;
+
+            // Shut volume down when dead
+            if (Player.IsDead && MediaPlayer.Volume > 0 && !DeadSongFlag)
+            {
+                MediaPlayer.Volume -= 0.01f;
+                if (MediaPlayer.Volume < 0)
+                    MediaPlayer.Volume = 0;
+            }
+            else if (Player.IsDead && !DeadSongFlag)
+            {
+                DeadSongFlag = true;
+                MediaPlayer.IsRepeating = false;
+                MediaPlayer.Stop();
+                MediaPlayer.Volume = 1f;
+                DeadSong.Play();
+            }
+        }
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -338,64 +389,25 @@ namespace CorridorGravity
                 if (!IntroFlag)
                 {
                     // Check for pause input  
-                    if (Keyboard.GetState().IsKeyDown(Keys.P) && ButtonFlag)
-                    {
-                        ButtonFlag = false;
-                        IsPaused = !IsPaused;
-
-                        if (IsPaused)
-                            MediaPlayer.Pause();
-                        else MediaPlayer.Resume();
-                    }
-                    if (Keyboard.GetState().IsKeyUp(Keys.P))
-                        ButtonFlag = true;
+                    CheckPauseFlag();
 
                     // Delay before fight
-                    if(DelayFlag)
-                    {
-                        if ((DateTime.Now - DelayTime).TotalSeconds > 6)
-                            DelayFlag = false; 
-                    }
-                    else if(SongFlag)
-                    {
-                        SongFlag = false;
-                        MediaPlayer.Volume = 0f;
-                        MediaPlayer.Play(BackgroundSong);
-                        MediaPlayer.IsRepeating = true;
-                    }
-                    else if (MediaPlayer.Volume < 1f && !SongFlag && !Player.IsDead) 
-                        MediaPlayer.Volume += 0.003f;
-                    
-                    // Shut volume down when dead
-                    if (Player.IsDead && MediaPlayer.Volume > 0 && !DeadSongFlag)
-                    {
-                        MediaPlayer.Volume -= 0.01f;
-                        if (MediaPlayer.Volume < 0)
-                            MediaPlayer.Volume = 0;
-                    } 
-                    else if(Player.IsDead && !DeadSongFlag)
-                    {
-                        DeadSongFlag = true;
-                        MediaPlayer.IsRepeating = false;
-                        MediaPlayer.Stop();
-                        MediaPlayer.Volume = 1f; 
-                        DeadSong.Play(); 
-                    } 
-                     
+                    ChangeSongOnGameState();
+
                     // If not paused
                     if (!IsPaused && IsActive)
                     {
-                        //Boss
+                                                                                    //Boss
                         if (!DelayFlag)
                         {
                             Boss.PlayerX = Player.X;
                             Boss.PlayerY = Player.Y;
                             Boss.PlayerScore = Player.ScoreCount;
-                            //Boss.LevelDimention = Player.LevelDimention;
+                            Boss.LevelDimention = Player.LevelDimention;
                             Boss.Update(gameTime);
 
                             if (Boss.IsDead)
-                                Player.LevelDimention = Boss.LevelDimention;
+                                Player.LevelDimention = Boss.LevelDimention; 
 
                             if (Boss.IsDead && Boss.IsReadyToSpawn && (DateTime.Now - Boss.DeadTime).TotalSeconds > BossRespawnTimeInSeconds)   // Relocate when time is up    
                             {
@@ -414,7 +426,7 @@ namespace CorridorGravity
                                     BossRespawnTimeInSeconds = MinBossSpawnTime;
                             }
 
-                            // Magic Updates
+                                                                                      // Magic Updates
                             foreach (var magic in MagicList)
                             {
                                 magic.Update(gameTime);
@@ -439,7 +451,7 @@ namespace CorridorGravity
                                 }
                                 else magic.LevelDimention = Boss.LevelDimention;
 
-                                // Portal spawns enemies
+                                                                                                    // Portal spawns enemies
                                 if (magic.IsReadyToSpawn && !magic.IsSpawned && magic.IsAlive)
                                 {
                                     magic.IsSpawned = true;
@@ -450,12 +462,12 @@ namespace CorridorGravity
                                 }
                             }
                         }
-                        // Characters Updates
-                        Player.Update(gameTime);
+
+                        Player.LevelDirection = Boss.LevelDirection;
+                        Player.Update(gameTime);                                                    // Characters Updates 
 
                         if (!DelayFlag)
-                        {
-                            //Enemy Update 
+                        {                                                                 //Enemy Update 
                             foreach (var enemy in EnemyList)
                             {
                                 if (!enemy.IsDead)
@@ -470,14 +482,14 @@ namespace CorridorGravity
                                 }
                             }
 
-                            // Check for collision
+                                                                                                    // Check for collision
                             CollideAllEntities();
 
-                            //Spawn more portals
+                                                                                                    //Spawn more portals
                             if (Player.ScoreCount > NextScoreGoal)
                             {
                                 MagicList.Add(new MagicEntity(Content, ENTITY_MAGIC, FRAME_HEIGHT, FRAME_WIDTH));
-                                NextScoreGoal += ScoreStep;
+                                NextScoreGoal += ScoreStep + NextScoreGoal;
                             }
                         } 
                     }

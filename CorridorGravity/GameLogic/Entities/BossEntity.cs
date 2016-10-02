@@ -28,6 +28,7 @@ namespace CorridorGravity.GameLogic
         private float TransparentPower = 0.01f;
         private float TransparentInc = 0.005f; 
         private float SummonVelocity = 4.8f;
+        private const int FistVelocityPlayerInc = 500;
 
         private int StrikeTimeInSeconds = 10;
         private int OnceAnimationType = -1;
@@ -49,6 +50,7 @@ namespace CorridorGravity.GameLogic
         public bool IsRuneSummoned { get; set; }
         public bool SummonDirection { get; set; }
         private bool IsGravityCollapsed { get; set; }
+        private bool IsAxisInverted { get; set; }
 
         private long BossSummonStrengthInc = 80;
         private long BossSummonStrength;
@@ -83,6 +85,7 @@ namespace CorridorGravity.GameLogic
             SummonFistAnimation = AnimationsPack.StrikeOne;
             SummonRuneAnimation = MagicAnimationPack.Walk;
 
+            LevelDirection = 1;
             BossSummonStrength = 1;
             LevelDimention = 0;
             IsAlive = true;
@@ -92,15 +95,15 @@ namespace CorridorGravity.GameLogic
         {
             StrikeTimeStart = DateTime.Now;
 
-            IsGravityCollapsed = false;
-            this.EntityDirection = EntityDirection;
             this.X = X;
             this.Y = Y;
             IsAlive = true;
-
-            BossSummonStrength = (playerScore / BossSummonStrengthInc % 10) + 1 ; 
-            IsOnceAnimated = true;
+            IsOnceAnimated = true; 
+            IsGravityCollapsed = false;
+            this.EntityDirection = EntityDirection;
             this.OnceAnimationType = OnceAnimationType;
+
+            BossSummonStrength = (playerScore / BossSummonStrengthInc % 10) + 1 ;
 
             switch (this.OnceAnimationType)
             {
@@ -118,10 +121,13 @@ namespace CorridorGravity.GameLogic
         }
 
         private void SummonFist()
-        {
+        { 
+            var SummonX = 0;
+            var SummonY = 0;
+
             SummonFistAnimation = AnimationsPack.StrikeOne;
 
-            if (SpellRandomizer.Next(1, 2) == 1)
+            if (SpellRandomizer.Next(1, 10) > 5)
                 SummonVelocity = -SummonVelocity; 
 
             switch (LevelDimention)
@@ -188,7 +194,10 @@ namespace CorridorGravity.GameLogic
         }
 
         private void SummonRune()
-        { 
+        {
+            var SummonX = 0;
+            var SummonY = 0;
+
             SummonRuneAnimation = MagicAnimationPack.Walk;
 
             switch (LevelDimention)
@@ -226,6 +235,12 @@ namespace CorridorGravity.GameLogic
             }
         }
 
+        private void InvertAxisDirections()
+        {
+            IsAxisInverted = true;
+            LevelDirection = -LevelDirection;
+        }
+
         private void SelectRandomSpell()
         {
             IsAttacked = true; 
@@ -238,6 +253,8 @@ namespace CorridorGravity.GameLogic
                 {
                     if ((nextSpell == 0 || nextSpell == 3 || nextSpell == 5) && IsGravityCollapsed)
                         nextSpell = SpellRandomizer.Next(0, 9);
+                    else if(IsAxisInverted && nextSpell == 7) 
+                        nextSpell = SpellRandomizer.Next(0, 9);
                     else break;
                 }
                 while (true);
@@ -246,14 +263,14 @@ namespace CorridorGravity.GameLogic
                 {
                     case 0:
                     case 3:
-                    case 5: CollapseGravity(); break;
+                    case 5: CollapseGravity();       break;
                     case 1:
                     case 4:
-                    case 7:
-                    case 9: SummonRune(); break;
+                    case 9: SummonRune();            break;
                     case 2:
                     case 6:
-                    case 8: SummonFist(); break;
+                    case 8: SummonFist();            break; 
+                    case 7: InvertAxisDirections(); break;
                     default: break;
                 }
             }
@@ -277,14 +294,14 @@ namespace CorridorGravity.GameLogic
                             if (SummonVelocity > 0)
                             {
                                 if (spell.X < LevelWidth) 
-                                    spell.X += SummonVelocity + playerScoreInc / 100; 
+                                    spell.X += SummonVelocity + playerScoreInc / FistVelocityPlayerInc; 
                                 else 
                                     IsFistSummoned = IsSummoned = false; 
                             }
                             else
                             {
                                 if (spell.X > 0)
-                                    spell.X += SummonVelocity + playerScoreInc / 100;
+                                    spell.X += SummonVelocity + playerScoreInc / FistVelocityPlayerInc;
                                 else 
                                     IsFistSummoned =  IsSummoned = false; 
                             }
@@ -294,14 +311,14 @@ namespace CorridorGravity.GameLogic
                             if (SummonVelocity > 0)
                             {
                                 if (spell.Y < LevelHeight)
-                                    spell.Y += SummonVelocity + playerScoreInc / 100;
+                                    spell.Y += SummonVelocity + playerScoreInc / FistVelocityPlayerInc;
                                 else 
                                     IsFistSummoned = IsSummoned = false; 
                             }
                             else
                             {
                                 if (spell.Y > 0)
-                                    spell.Y += SummonVelocity + playerScoreInc / 100;
+                                    spell.Y += SummonVelocity + playerScoreInc / FistVelocityPlayerInc;
                                 else 
                                     IsFistSummoned = IsSummoned = false; 
                             }
@@ -321,7 +338,11 @@ namespace CorridorGravity.GameLogic
 
                 //Update summon/strike animation
                 if (IsRuneSummoned)
-                    IsSummoned = IsRuneSummoned = SummonRuneAnimation.UpdateSingleAnimationIsEnded(gameTime);
+                {
+                    IsRuneSummoned = SummonRuneAnimation.UpdateSingleAnimationIsEnded(gameTime);
+                    if(!IsRuneSummoned && !IsFistSummoned) 
+                        IsSummoned = false; 
+                }
                 if(IsFistSummoned)
                 {
                     SummonFistAnimation.UpdateSingleAnimationIsEnded(gameTime);
@@ -342,6 +363,7 @@ namespace CorridorGravity.GameLogic
                         LevelDimention = FutureDimention;
                         IsSpawned = false;
                         IsAttacked = false;
+                        IsAxisInverted = false;
                         IsDead = true;
                         DeadTime = DateTime.Now;
                     }
@@ -373,8 +395,10 @@ namespace CorridorGravity.GameLogic
             {
                 var eyeWhiteX = 0f;
                 var eyeWhiteY = 0f;
+
                 var eyeRedX = 0f;
                 var eyeRedY = 0f;
+
                 var eyeBlackX = 0f;
                 var eyeBlackY = 0f; 
 

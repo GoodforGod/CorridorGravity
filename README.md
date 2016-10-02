@@ -11,6 +11,7 @@ Eye is watching you...
   - A/D or <-/-> to move left and right.
   - W/^ to jump
   - E and Q to attack (Also attack in the air)
+  - SPACE to use Ultimate
  
 # Download :clipboard:
 ![](https://github.com/GoodforGod/CorridorGravity/blob/master/CorridorGravity/readme-3.png)
@@ -21,7 +22,7 @@ Eye is watching you...
  - Visual Studio 2015 CE
 
 # Version :date:
- *Alpha 1.0.1*
+ *Beta 1.0.0*
 
 # Ifno :speech_balloon:
 

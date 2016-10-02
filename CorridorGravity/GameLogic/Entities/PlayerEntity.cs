@@ -20,7 +20,10 @@ namespace CorridorGravity.GameLogic
         public Animation CurrentAnimation { get; set; }
         private Bob AnimationsPack;
         public DateTime LastHitTime;
-
+        public DateTime UltimateCooldownTime;
+         
+        private const int StepForHealthBar = 20;
+        public const int COOLDOWN_LIMIT = 2;
         public const int ENTITY_HEIGHT = 90;
         public const int ENTITY_WIDTH = 44;
         private const int LEVEL_OFFSET_HEIGHT = 20;
@@ -35,6 +38,7 @@ namespace CorridorGravity.GameLogic
         private const float GRAVITY_POWER = -9.8f;
         private const float ROTATION_ANGLE_LIMIT = 1.570f;
 
+        public bool IsUsingUltimate { get; set; }
         public bool IsAlive { get; set; }
         public bool IsDead { get; set; }
         private bool IsOnceAnimated { get; set; }
@@ -81,6 +85,7 @@ namespace CorridorGravity.GameLogic
             LevelDirection = 1;
             LevelDimention = 0;
             LastHitTime = new DateTime();
+            UltimateCooldownTime = new DateTime();
 
             Y = LevelHeight - ENTITY_HEIGHT - 1;
             X = LevelWidth / 2;
@@ -91,16 +96,11 @@ namespace CorridorGravity.GameLogic
             CurrentAnimation = AnimationsPack.Celebrate;
             OnceAnimationType = 3;
             IsOnceAnimated = true;
-        }
-
-        public override void Init()
-        { 
-
-        }
+        } 
          
         public bool GetPLayerStrikeStatus()
         {
-            if (OnceAnimationType == 0 || OnceAnimationType == 1 || OnceAnimationType == 2)
+            if (OnceAnimationType == 0 || OnceAnimationType == 1 || OnceAnimationType == 2 || OnceAnimationType == 5)
                 return true;
             else return false;
         }
@@ -256,7 +256,14 @@ namespace CorridorGravity.GameLogic
                 OnceAnimationType = 2;
             else if (!IsGrounded())
                 OnceAnimationType = 2;
-            else OnceAnimationType = AnimationType;
+            else if(AnimationType != 5)
+                OnceAnimationType = AnimationType;
+            else if((DateTime.Now - UltimateCooldownTime).TotalSeconds > COOLDOWN_LIMIT)
+            {
+                UltimateCooldownTime = DateTime.Now;
+                OnceAnimationType = 5;
+                IsUsingUltimate = true;
+            }
         }
 
         public void TestGravityCollapce()
@@ -271,12 +278,12 @@ namespace CorridorGravity.GameLogic
             if (state.IsKeyUp(Keys.C) && accum == 1 && IsAlive)
                 accum = -1;
 
-            if (state.IsKeyDown(Keys.Space) && accum == -1 && IsAlive)       // Floor
+            if (state.IsKeyDown(Keys.X) && accum == -1 && IsAlive)       // Floor
             {
                 accum = 2;
                 CollapseGravity(accum);
             }
-            if (state.IsKeyUp(Keys.Space) && accum == 2 && IsAlive)
+            if (state.IsKeyUp(Keys.X) && accum == 2 && IsAlive)
                 accum = -1;
 
             if (state.IsKeyDown(Keys.V) && accum == -1 && IsAlive)           // LeftWall
@@ -303,23 +310,26 @@ namespace CorridorGravity.GameLogic
 
             KeyboardState state = Keyboard.GetState(); 
 
-            if (state.IsKeyUp(Keys.Q) && state.IsKeyUp(Keys.E) && !IsOnceAnimated && IsAlive && IsOnSrike) 
+            if (state.IsKeyUp(Keys.Q) && state.IsKeyUp(Keys.E) && state.IsKeyUp(Keys.Space) && !IsOnceAnimated && IsAlive && IsOnSrike) 
                 IsOnSrike = false;  
 
+            // Direction
             if (state.IsKeyDown(Keys.Right) || state.IsKeyDown(Keys.D) && IsAlive)
                 rightState = true;
             if (state.IsKeyDown(Keys.Left) || state.IsKeyDown(Keys.A) && IsAlive)
                 leftState = true;
+            
+            // Strike animation
             if (state.IsKeyDown(Keys.Q) && !IsOnceAnimated && IsAlive && !IsOnSrike) 
                 SetStrikeAnimationType(0); 
             if (state.IsKeyDown(Keys.E) && !IsOnceAnimated && IsAlive && !IsOnSrike) 
                 SetStrikeAnimationType(1);
+            if (state.IsKeyDown(Keys.Space) && !IsOnceAnimated && IsAlive && !IsOnSrike)
+                SetStrikeAnimationType(5);
 
-            // Test code section BEGIN ####
-
+            // #### TEST CODE SECTION #### 
             //TestGravityCollapce();
-
-            // #########   END  ###########
+            // #### TEST CODE SECTION #### 
 
             // Slow during attack
             var velocityLimit = 0;
@@ -460,6 +470,7 @@ namespace CorridorGravity.GameLogic
                     case 2: CurrentAnimation = AnimationsPack.JumpStrike;   break;
                     case 3: CurrentAnimation = AnimationsPack.Celebrate;    break;
                     case 4: CurrentAnimation = AnimationsPack.Dead;         break;
+                    case 5: CurrentAnimation = AnimationsPack.Ultimate;     break;
                     default:                                                break;
                 }
             }
@@ -487,7 +498,7 @@ namespace CorridorGravity.GameLogic
                 X = ENTITY_HEIGHT;
                 VelocityAxisX = 0;
             }
-            else if (X - LEVEL_OFFSET_HEIGHT > LevelWidth)
+            else if (X - LEVEL_OFFSET_HEIGHT * 2 > LevelWidth)
             {
                 if (LevelDimention == 1)
                 {
@@ -553,7 +564,7 @@ namespace CorridorGravity.GameLogic
                     else return false;
 
                 case 1:
-                    if (X + LEVEL_OFFSET_HEIGHT - offset * 2 >= LevelWidth)
+                    if (X + LEVEL_OFFSET_HEIGHT - offset * 12 >= LevelWidth)
                     {
                         DoubleJumpFlag = 0;
                         return true;
@@ -561,7 +572,7 @@ namespace CorridorGravity.GameLogic
                     else return false;
 
                 case 2:
-                    if (Y + offset <= LEVEL_OFFSET_HEIGHT)
+                    if (Y + offset <= LEVEL_OFFSET_HEIGHT - 6)
                     {
                         DoubleJumpFlag = 0;
                         return true;
@@ -569,7 +580,7 @@ namespace CorridorGravity.GameLogic
                     else return false;
 
                 case 3:
-                    if (X + offset <= LEVEL_OFFSET_HEIGHT * 5)
+                    if (X + offset <= LEVEL_OFFSET_HEIGHT * 5 - 6)
                     {
                         DoubleJumpFlag = 0;
                         return true;
@@ -578,12 +589,7 @@ namespace CorridorGravity.GameLogic
 
                 default: return true;
             }
-        } 
-
-        private void InverseAxisDirections()
-        {
-            LevelDirection = -LevelDirection;
-        }
+        }  
 
         public void CollapseGravity(int calledDimention)                          // Changes the dimention (gravity and physics of the game)
         {
@@ -623,6 +629,8 @@ namespace CorridorGravity.GameLogic
             { 
                 if (!IsDead)
                     IsOnceAnimated = CurrentAnimation.UpdateSingleAnimationIsEnded(gameTime);
+                if (!IsOnceAnimated && OnceAnimationType == 5)
+                    IsUsingUltimate = false;
                 if (!IsOnceAnimated)
                     OnceAnimationType = -1;
                 if (!IsOnceAnimated && !IsAlive) 
@@ -630,10 +638,46 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        public override void Draw(SpriteBatch batcher)
+        private Vector2 AdjustCoordinatesForAnimation(float StrikeCoordX, float StrikeCoordY)
         {
-            SpriteEffects effectsApplyed = SpriteEffects.None; 
+            if (CurrentAnimation == AnimationsPack.StrikeTwo)
+            {
+                switch (LevelDimention)
+                {
+                    case 0: StrikeCoordY = Y - LEVEL_OFFSET_HEIGHT; break;
+                    case 1: StrikeCoordX = X - LEVEL_OFFSET_HEIGHT / 2 + 2; break;
+                    case 2: StrikeCoordY = Y + LEVEL_OFFSET_HEIGHT / 2; break;
+                    case 3: StrikeCoordX = X + LEVEL_OFFSET_HEIGHT; break;
+                    default: break;
+                }
+            }
+            else if (CurrentAnimation == AnimationsPack.Ultimate)
+            {
+                switch (LevelDimention)
+                {
+                    case 0: StrikeCoordY = Y - LEVEL_OFFSET_HEIGHT * 2 + 2; break;
+                    case 1: StrikeCoordX = X - LEVEL_OFFSET_HEIGHT / 2 + 2; break;
+                    case 2: StrikeCoordY = Y + LEVEL_OFFSET_HEIGHT / 4 - 2; break;
+                    case 3: StrikeCoordX = X + LEVEL_OFFSET_HEIGHT * 2 - 4; break;
+                    default: break;
+                }
+            }
+            if ((CurrentAnimation == AnimationsPack.StrikeOne || CurrentAnimation == AnimationsPack.StrikeTwo) && EntityDirection)
+            {
+                switch (LevelDimention)
+                {
+                    case 0: StrikeCoordX = X - (CurrentAnimation.CurrentRectangle.Width - 50); break;
+                    case 1: StrikeCoordY = Y - (CurrentAnimation.CurrentRectangle.Width - 50); break;
+                    case 2: StrikeCoordX = X - (CurrentAnimation.CurrentRectangle.Width - 50); break;
+                    case 3: StrikeCoordY = Y - (CurrentAnimation.CurrentRectangle.Width - 50); break;
+                    default: break;
+                }
+            }
+            return new Vector2(StrikeCoordX, StrikeCoordY);
+        }
 
+        private SpriteEffects AdjustSpriteEffect()
+        { 
             switch (LevelDimention)                             // Choose sprite flip, depend on the current dimention
             {
                 case 0:
@@ -641,73 +685,54 @@ namespace CorridorGravity.GameLogic
                         RotationAngle -= RotationAngleInc;
                     else RotationAngle = 0;
                     if (EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally;
-                    else effectsApplyed = SpriteEffects.None;
-                    break;
+                        return SpriteEffects.FlipHorizontally;
+                    else return SpriteEffects.None;
 
                 case 1:
                     if (RotationAngle >= 0 && RotationAngle < ROTATION_ANGLE_LIMIT)
                         RotationAngle += RotationAngleInc;
                     else RotationAngle = ROTATION_ANGLE_LIMIT;
                     if (EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
-                    else effectsApplyed = SpriteEffects.FlipVertically;
-                    break;
+                        return SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
+                    else return SpriteEffects.FlipVertically; 
 
                 case 2:
                     if (RotationAngle <= ROTATION_ANGLE_LIMIT && RotationAngle > 0)
                         RotationAngle -= RotationAngleInc;
                     else RotationAngle = 0;
                     if (EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
-                    else effectsApplyed = SpriteEffects.FlipVertically;
-                    break;
+                        return SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
+                    else return SpriteEffects.FlipVertically; 
 
                 case 3:
                     if (RotationAngle >= 0 && RotationAngle < ROTATION_ANGLE_LIMIT)
                         RotationAngle += RotationAngleInc;
                     else RotationAngle = ROTATION_ANGLE_LIMIT;
                     if (EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally;
-                    else effectsApplyed = SpriteEffects.None;
-                    break;
+                        return SpriteEffects.FlipHorizontally;
+                    else return SpriteEffects.None; 
 
-                default: break;
+                default: return SpriteEffects.None;
             }
+        }
 
-            var StrikeCoordX = X;
-            var StrikeCoordY = Y; 
-            var StepForHealthBar = 20;
+        public override void Draw(SpriteBatch batcher)
+        {
+            SpriteEffects effectsApplyed = AdjustSpriteEffect();
+
+            var HealthBarAxisX = 20; 
+            var HealthBarInc = 44;
 
             if (IsDead)
-                batcher.Draw(EntitySprite, new Vector2(StrikeCoordX, StrikeCoordY), new Rectangle(430, 130, 78, 90), TintColor,
+                batcher.Draw(EntitySprite, new Vector2(X, Y), new Rectangle(430, 130, 78, 90), TintColor,
                                             RotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
             else
-            { 
-                if (CurrentAnimation == AnimationsPack.StrikeTwo)
-                {
-                    switch (LevelDimention)
-                    {
-                        case 0: StrikeCoordY = Y - LEVEL_OFFSET_HEIGHT;   break;
-                        case 1: StrikeCoordX = X - LEVEL_OFFSET_HEIGHT;   break;
-                        case 2: StrikeCoordY = Y + LEVEL_OFFSET_HEIGHT/2; break;
-                        case 3: StrikeCoordX = X + LEVEL_OFFSET_HEIGHT;   break; 
-                        default: break;
-                    }
-                }
-                if ((CurrentAnimation == AnimationsPack.StrikeOne || CurrentAnimation == AnimationsPack.StrikeTwo) && EntityDirection)
-                {
-                    switch (LevelDimention)
-                    {
-                        case 0: StrikeCoordX = X - (CurrentAnimation.CurrentRectangle.Width - 50); break;
-                        case 1: StrikeCoordY = Y - (CurrentAnimation.CurrentRectangle.Width - 50); break;
-                        case 2: StrikeCoordX = X - (CurrentAnimation.CurrentRectangle.Width - 50); break;
-                        case 3: StrikeCoordY = Y - (CurrentAnimation.CurrentRectangle.Width - 50); break;
-                        default: break;
-                    }
-                }
+            {
+                // Adjust coordinates
+                var AdjustedCoordinates = AdjustCoordinatesForAnimation(X, Y); 
+
                 // Entity draw
-                batcher.Draw(EntitySprite, new Vector2(StrikeCoordX, StrikeCoordY), CurrentAnimation.CurrentRectangle, TintColor,
+                batcher.Draw(EntitySprite, new Vector2(AdjustedCoordinates.X, AdjustedCoordinates.Y), CurrentAnimation.CurrentRectangle, TintColor,
                                             RotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
             }
             // Portrait draw
@@ -717,9 +742,9 @@ namespace CorridorGravity.GameLogic
             // Health bar draw
             for(int i = 0; i < HealthCount; i++)
             { 
-                batcher.Draw(EntitySprite, new Vector2(StepForHealthBar, LevelHeight), AnimationsPack.Health.CurrentRectangle, Color.Beige,
+                batcher.Draw(EntitySprite, new Vector2(HealthBarAxisX, LevelHeight), AnimationsPack.Health.CurrentRectangle, Color.Beige,
                  0f, new Vector2(1, 1), 1f, SpriteEffects.None, .0f);
-                StepForHealthBar += 44;
+                HealthBarAxisX += HealthBarInc;
             }
 
         } 

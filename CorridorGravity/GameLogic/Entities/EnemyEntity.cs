@@ -28,8 +28,8 @@ namespace CorridorGravity.GameLogic
         private int OnceAnimationType = -1; 
         private float TransparentPower = 1f;
 
-        public const int ENTITY_HEIGHT = 72;
-        public const int ENTITY_WIDTH = 44; 
+        public int EntityHeight { get; }
+        public int EntityWidth { get; }
         private const int LEVEL_OFFSET_HEIGHT = 20;
         private const int DISTANCE_BETWEEN_ENTITIES = 105;
         private const int SCORE_VELOCITY_LIMIT = 10;
@@ -64,19 +64,21 @@ namespace CorridorGravity.GameLogic
         public EnemyEntity(ContentManager content, string contentName, int levelHeight, int levelWidth, bool EntityDirection, float X, float Y)
         {
             EntitySprite = content.Load<Texture2D>(contentName);
-
-            LevelHeight = levelHeight - LEVEL_OFFSET_HEIGHT;
-            LevelWidth = levelWidth;
-
-            PlayerScore = 1;
             MagicAnimationPack = new Magic(content);
             AnimationsPack = new Enemy();
             CurrentAnimation = AnimationsPack.Idle;
+
+            LevelHeight = levelHeight - LEVEL_OFFSET_HEIGHT;
+            LevelWidth = levelWidth;
+            LevelDimention = 0;
+            LevelDirection = 1;
+
+            EntityHeight = 72;
+            EntityWidth = 44;
+            PlayerScore = 1;
             IsAlive = true;
             this.Y = Y;
             this.X = X;
-            LevelDimention = 0;
-            LevelDirection = 1;
             this.EntityDirection = EntityDirection;
         }
 
@@ -86,10 +88,6 @@ namespace CorridorGravity.GameLogic
                 return true;
             else return false;
         }
-
-        public int GetEntityWidth() { return ENTITY_WIDTH; }
-
-        public int GetEntityHeight() { return ENTITY_HEIGHT; } 
 
         private void IncreaseVelocityRight()                                // If right key down & speed not max, then accelerate
         {
@@ -388,16 +386,16 @@ namespace CorridorGravity.GameLogic
 
         private void CoordinatesInFrameWall()                                   // Case dimention is one of the walls
         {
-            if (X - ENTITY_HEIGHT < 0)
+            if (X - EntityHeight < 0)
             {                                        // X position fall out frame
-                X = ENTITY_HEIGHT;
+                X = EntityHeight;
                 VelocityAxisX = 0;
             }
             else if (X - LEVEL_OFFSET_HEIGHT > LevelWidth)
             {
                 if (LevelDimention == 1)
                 {
-                    X = LevelWidth - ENTITY_WIDTH;
+                    X = LevelWidth - EntityWidth;
                     VelocityAxisX = 0;
                 }
                 else
@@ -412,10 +410,10 @@ namespace CorridorGravity.GameLogic
                 EntityDirection = false;
                 Y = VelocityAxisY = 0;
             }
-            else if (Y + ENTITY_WIDTH >= LevelHeight)
+            else if (Y + EntityWidth >= LevelHeight)
             {         // Y position fall out frame 
                 EntityDirection = true;
-                Y = LevelHeight - ENTITY_WIDTH;         // Velocity = 0;
+                Y = LevelHeight - EntityWidth;         // Velocity = 0;
                 VelocityAxisY = 0;
             }
         }
@@ -427,18 +425,18 @@ namespace CorridorGravity.GameLogic
                 EntityDirection = true;
                 X = VelocityAxisX = 0; 
             }
-            else if (X + ENTITY_WIDTH > LevelWidth)
+            else if (X + EntityWidth > LevelWidth)
             {
                 EntityDirection = false;
-                X = LevelWidth - ENTITY_WIDTH;
+                X = LevelWidth - EntityWidth;
                 VelocityAxisX = 0;
             }
 
             if (Y < 0) 
                 Y = VelocityAxisY = 0;  
-            else if (Y + ENTITY_HEIGHT >= LevelHeight)          // Y position fall out frame
+            else if (Y + EntityHeight >= LevelHeight)          // Y position fall out frame
             {
-                Y = LevelHeight - ENTITY_HEIGHT;         // Velocity = 0;
+                Y = LevelHeight - EntityHeight;         // Velocity = 0;
                 VelocityAxisY = 0;
             }
         }
@@ -450,7 +448,7 @@ namespace CorridorGravity.GameLogic
             switch (LevelDimention)
             {
                 case 0:
-                    if (Y + ENTITY_HEIGHT + offset >= LevelHeight) 
+                    if (Y + EntityHeight + offset >= LevelHeight) 
                         return true; 
                     else return false; 
 
@@ -503,39 +501,38 @@ namespace CorridorGravity.GameLogic
             }  
         }
 
-        public override void Draw(SpriteBatch batcher)
+        private SpriteEffects AdjustSpriteEffect()
         {
-            SpriteEffects effectsApplyed = SpriteEffects.None; 
-
             switch (LevelDimention)                             // Choose sprite flip, depend on the current dimention
             {
-                case 0: 
+                case 0:
                     if (!EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally;
-                    else effectsApplyed = SpriteEffects.None;
-                    break;
+                        return SpriteEffects.FlipHorizontally;
+                    else return SpriteEffects.None; 
 
-                case 1: 
+                case 1:
                     if (EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
-                    else effectsApplyed = SpriteEffects.FlipVertically;
-                    break;
+                        return SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
+                    else return SpriteEffects.FlipVertically; 
 
-                case 2: 
+                case 2:
                     if (!EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
-                    else effectsApplyed = SpriteEffects.FlipVertically;
-                    break;
+                        return SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
+                    else return SpriteEffects.FlipVertically; 
 
-                case 3: 
+                case 3:
                     if (EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally;
-                    else effectsApplyed = SpriteEffects.None;
-                    break;
+                        return SpriteEffects.FlipHorizontally;
+                    else return SpriteEffects.None; 
 
-                default: break;
+                default: return SpriteEffects.None;
             }
+        }
 
+        public override void Draw(SpriteBatch batcher)
+        {
+            SpriteEffects effectsApplyed = AdjustSpriteEffect();
+            
             if (IsDead) 
                 batcher.Draw(EntitySprite, new Vector2(X, Y), new Rectangle(0, 0, 1, 1), TintColor); 
             else if (OnceAnimationType == 4) 

@@ -23,6 +23,7 @@ namespace CorridorGravity.GameLogic
 
         private int LevelHeight { get; set; }
         private int LevelWidth { get; set; }
+        private float RotationAngle { get; set; }
 
         public bool IsSpawned { get; set; }
         public bool IsReadyToSpawn { get; set; }
@@ -96,48 +97,45 @@ namespace CorridorGravity.GameLogic
             }
         }
 
-        public override void Draw(SpriteBatch batcher)
+        private SpriteEffects AdjustSpriteEffect()
         {
-            SpriteEffects effectsApplyed = SpriteEffects.None;  
-            var rotationAngle = .0f;
-            
             switch (LevelDimention)                             // Choose sprite flip, depend on the current dimention
             {
                 case 0:
-                    rotationAngle = .0f;
+                    RotationAngle = .0f;
                     if (!EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally;
-                    else effectsApplyed = SpriteEffects.None;
-                    break;
+                        return SpriteEffects.FlipHorizontally;
+                    else return SpriteEffects.None; 
 
                 case 1:
-                    rotationAngle = 1.571f;
+                    RotationAngle = 1.571f;
                     if (EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
-                    else effectsApplyed = SpriteEffects.FlipVertically;
-                    break;
+                        return SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
+                    else return SpriteEffects.FlipVertically; 
 
                 case 2:
-                    rotationAngle = .0f;
+                    RotationAngle = .0f;
                     if (!EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
-                    else effectsApplyed = SpriteEffects.FlipVertically;
-                    break;
+                        return SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
+                    else return SpriteEffects.FlipVertically; 
 
                 case 3:
-                    rotationAngle = 1.571f;
+                    RotationAngle = 1.571f;
                     if (EntityDirection)
-                        effectsApplyed = SpriteEffects.FlipHorizontally;
-                    else effectsApplyed = SpriteEffects.None;
-                    break;
+                        return SpriteEffects.FlipHorizontally;
+                    else return SpriteEffects.None; 
 
-                default: break;
+                default: return SpriteEffects.None; 
             }
+        }
+
+        public override void Draw(SpriteBatch batcher)
+        {
+            SpriteEffects effectsApplyed = AdjustSpriteEffect();
 
             if (IsOnceAnimated != -1)
                 batcher.Draw(AnimationsPack.MagicSprite, new Vector2(X, Y), CurrentAnimation.CurrentRectangle, TintColor*TransparentPower,
-                                            rotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
-
+                                            RotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f); 
         } 
     }
 }

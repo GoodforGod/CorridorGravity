@@ -23,7 +23,5 @@ namespace CorridorGravity.GameLogic
         public virtual void Update() { }
 
         public virtual void Update(GameTime gameTime) { }
-
-        public virtual void Touch() { }
     }
 }

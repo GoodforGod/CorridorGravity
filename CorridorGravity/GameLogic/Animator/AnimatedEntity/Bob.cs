@@ -9,6 +9,8 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
     {
         public const double INTERVAL_DEFAULT = .15;
         public const double INTERVAL_ATTACK = .10;
+        public const double INTERVAL_ULTIMATE = .15;
+        public const int ULTIMATE_LENGTH = 5;
 
         public Bob()
         {
@@ -23,6 +25,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             Celebrate = new Animation();
             Portrait = new Animation();
             Health = new Animation();
+            Ultimate = new Animation();
 
             // Idle 192x84 (each 48x84) start in 6x15
             Idle.AddFrame(new Rectangle(6, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
@@ -92,6 +95,25 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             Portrait.AddFrame(new Rectangle(543, 531, 23, 34), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
  
             Health.AddFrame(new Rectangle(440, 499, 36, 38), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
+
+            // Ultimate (each 64x120) start in 0x608
+            Ultimate.AddFrame(new Rectangle(550, 608, 48, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            Ultimate.AddFrame(new Rectangle(0, 608, 65, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            Ultimate.AddFrame(new Rectangle(62, 608, 67, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+
+            // Loop start
+            for (int i = 0; i < ULTIMATE_LENGTH; i++)
+            { 
+                Ultimate.AddFrame(new Rectangle(125, 608, 78, 120), TimeSpan.FromSeconds(INTERVAL_ULTIMATE));
+                Ultimate.AddFrame(new Rectangle(211, 608, 65, 120), TimeSpan.FromSeconds(INTERVAL_ULTIMATE));
+                Ultimate.AddFrame(new Rectangle(307, 608, 67, 120), TimeSpan.FromSeconds(INTERVAL_ULTIMATE));
+                Ultimate.AddFrame(new Rectangle(386, 608, 75, 120), TimeSpan.FromSeconds(INTERVAL_ULTIMATE));
+            }
+            // Loop end
+
+            Ultimate.AddFrame(new Rectangle(476, 608, 48, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+            Ultimate.AddFrame(new Rectangle(550, 608, 48, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+
         }
 
         public override Animation Idle { get; }
@@ -115,5 +137,7 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
         public override Animation Portrait { get; }
 
         public override Animation Health { get; }
+
+        public Animation Ultimate { get; }
     }
 }
