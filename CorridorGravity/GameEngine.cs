@@ -43,7 +43,8 @@ namespace CorridorGravity
         private const string ENTITY_BOSS = "magolor-soul-white";
         private const string ENTITY_MAGIC = "magic-white";
 
-        private const string TEXTURE_WORLD = "world-background-score-1";
+        private const string TEXTURE_FIRE_SMOKE = "fire-smoke";
+        private const string TEXTURE_WORLD = "world-background-score-2";
         private const string TEXTURE_PILL = "pill-white";
         private const string TEXTURE_INTRO = "intro-1";
         private const string TEXTURE_PAUSE = "world-paused";
@@ -172,7 +173,7 @@ namespace CorridorGravity
 
         private void InitCharacter()
         {
-            Player = new PlayerEntity(Content, ENTITY_PLAYER, World.LevelHeight - FRAME_SCORE_OFFSET, World.LevelWidth);
+            Player = new PlayerEntity(Content, ENTITY_PLAYER, FONT_SCORE, TEXTURE_FIRE_SMOKE, World.LevelHeight - FRAME_SCORE_OFFSET, World.LevelWidth);
             Player.Init(); 
         }
 
@@ -407,7 +408,10 @@ namespace CorridorGravity
                             Boss.Update(gameTime);
 
                             if (Boss.IsDead)
-                                Player.LevelDimention = Boss.LevelDimention; 
+                            {
+                                Player.LevelDirection = Boss.LevelDirection;
+                                Player.LevelDimention = Boss.LevelDimention;
+                            }
 
                             if (Boss.IsDead && Boss.IsReadyToSpawn && (DateTime.Now - Boss.DeadTime).TotalSeconds > BossRespawnTimeInSeconds)   // Relocate when time is up    
                             {
@@ -462,8 +466,7 @@ namespace CorridorGravity
                                 }
                             }
                         }
-
-                        Player.LevelDirection = Boss.LevelDirection;
+                        
                         Player.Update(gameTime);                                                    // Characters Updates 
 
                         if (!DelayFlag)
@@ -474,7 +477,7 @@ namespace CorridorGravity
                                 {
                                     enemy.RotationAngle = Player.RotationAngle;
                                     enemy.LevelDimention = Player.LevelDimention;
-                                    enemy.LevelDirection = Player.LevelDirection;
+                                    //enemy.LevelDirection = Player.LevelDirection;
                                     enemy.PlayerX = Player.X;
                                     enemy.PlayerY = Player.Y;
                                     enemy.PlayerScore = Player.ScoreCount;

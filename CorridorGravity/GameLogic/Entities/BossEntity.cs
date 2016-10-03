@@ -34,8 +34,8 @@ namespace CorridorGravity.GameLogic
         private int OnceAnimationType = -1;
         public bool EntityDirection;
 
-        private int LevelHeight { get; set; }
-        private int LevelWidth { get; set; }
+        private int LevelHeight { get; }
+        private int LevelWidth { get; }
 
         public bool IntroFlag { get; set; }
         public bool IsSpawned { get; set; }
@@ -54,7 +54,7 @@ namespace CorridorGravity.GameLogic
 
         private long BossSummonStrengthInc = 80;
         private long BossSummonStrength;
-        public long PlayerScore = 1;
+        public int PlayerScore = 1;
         public int FutureDimention { get; set; }
         public int LevelDimention { get; set; }
         public int LevelDirection { get; set; }    // 1 - Correct direction, -1 - inverse
@@ -237,6 +237,9 @@ namespace CorridorGravity.GameLogic
 
         private void InvertAxisDirections()
         {
+            if (SpellList.Count == 0 && IsSummoned == true)
+                IsSummoned = false;
+
             IsAxisInverted = true;
             LevelDirection = -LevelDirection;
         }

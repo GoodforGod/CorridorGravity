@@ -51,15 +51,15 @@ namespace CorridorGravity.GameLogic
         public bool IsDead { get; set; }
         public bool IsAttacked { get; set; }
         public float RotationAngle = .0f;
-        public long PlayerScore { get; set; }
+        public int PlayerScore { get; set; }
 
-        private int LevelHeight { get; set; }
-        private int LevelWidth { get; set; }
+        private int LevelHeight { get; }
+        private int LevelWidth { get; }
         public int LevelDirection { get; set; }       // 1 - Correct direction, -1 - inverse
         public int LevelDimention { get; set; }       // 0 - Ground=Ground, 
-                                                // 1 - RightWall=Ground, 
-                                                // 2 - Top=Ground,
-                                                // 3 - LeftWall=Ground.
+                                                      // 1 - RightWall=Ground, 
+                                                      // 2 - Top=Ground,
+                                                      // 3 - LeftWall=Ground.
 
         public EnemyEntity(ContentManager content, string contentName, int levelHeight, int levelWidth, bool EntityDirection, float X, float Y)
         {

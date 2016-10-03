@@ -15,15 +15,18 @@ namespace CorridorGravity.GameLogic
         public override float X { get; set; }
         public override float Y { get; set; }
 
-        public SpriteFont ScoreFont { get; }
+        public SpriteFont ScoreFont { get; } 
+        public Texture2D FireSmokeSprite { get; }
         public override Texture2D EntitySprite { get; }
         public Animation CurrentAnimation { get; set; }
+        public Animation FireAnimation { get; set; }
+        public Animation SmokeAnimation { get; set; }
         private Bob AnimationsPack;
         public DateTime LastHitTime;
         public DateTime UltimateCooldownTime;
          
-        private const int StepForHealthBar = 20;
-        public const int COOLDOWN_LIMIT = 2;
+        private const int HEALTH_BAR_STEP = 20;
+        private const int COOLDOWN_LIMIT = 30;
         public const int ENTITY_HEIGHT = 90;
         public const int ENTITY_WIDTH = 44;
         private const int LEVEL_OFFSET_HEIGHT = 20;
@@ -37,66 +40,64 @@ namespace CorridorGravity.GameLogic
         private const float ACCELERATION_X_AXIS = 85f;
         private const float GRAVITY_POWER = -9.8f;
         private const float ROTATION_ANGLE_LIMIT = 1.570f;
+        private const float ROTATION_ANGLE_INC = 0.157f;
 
+        public bool IsSmoky { get; set; }
+        public bool IsUltimateReady { get; set; }
         public bool IsUsingUltimate { get; set; }
         public bool IsAlive { get; set; }
         public bool IsDead { get; set; }
         private bool IsOnceAnimated { get; set; }
         public bool IsOnSrike { get; set; }
-         
-        public float RotationAngleInc = 0.157f;
-        public float RotationAngle = .0f;
-        public long ScoreCount { get; set; }
+          
+        public int ScoreCount { get; set; }
         public int HealthCount { get; set; }
         private int DoubleJumpFlag = 0;
-        private int OnceAnimationType = -1; 
+        private int OnceAnimationType = -1;
+        private int accum = -1;
+        
+        public float RotationAngle = .0f;
         private float SlowDownLimit = 0.001f;
         private float VelocityAxisY = 0;
-        private float VelocityAxisX = 0;
-        private int accum = -1;
+        private float VelocityAxisX = 0; 
          
         public bool EntityDirection { get; set; }   // Direction of animation, false - Animation direction right, true - left
-        private int LevelHeight { get; set; }
-        private int LevelWidth { get; set; } 
-        public int LevelDirection { get; set; }    // 1 - Correct direction, -1 - inverse
-        public int LevelDimention { get; set; }    // 0 - Ground=Ground, 
+        private int LevelHeight { get; }
+        private int LevelWidth { get; } 
+        public int LevelDirection { get; set; }     // 1 - Correct direction, -1 - inverse
+        public int LevelDimention { get; set; }     // 0 - Ground=Ground, 
                                                     // 1 - RightWall=Ground, 
                                                     // 2 - Top=Ground,
-                                                    // 3 - LeftWall=Ground. 
-
-        public PlayerEntity(ContentManager content, int levelHeight, int levelWidth)
+                                                    // 3 - LeftWall=Ground.  
+        public PlayerEntity(ContentManager content, string playerSpriteContentName, 
+                                string scoreFontContentName, string fireSmokeContentName,
+                                        int levelHeight, int levelWidth)
         {
-            ScoreFont = content.Load<SpriteFont>("score-font");
-            EntitySprite = content.Load<Texture2D>("player-2-white-1");
-            ConstractCommonParts(levelHeight, levelWidth);
-        }
+            ScoreFont = content.Load<SpriteFont>(scoreFontContentName);
+            EntitySprite = content.Load<Texture2D>(playerSpriteContentName);
+            FireSmokeSprite = content.Load<Texture2D>(fireSmokeContentName);
 
-        public PlayerEntity(ContentManager content, string contentName, int levelHeight, int levelWidth)
-        {
-            ScoreFont = content.Load<SpriteFont>("score-font");
-            EntitySprite = content.Load<Texture2D>(contentName);
-            ConstractCommonParts(levelHeight, levelWidth);
-        }
-
-        private void ConstractCommonParts(int levelHeight, int levelWidth)
-        {
             LevelHeight = levelHeight - LEVEL_OFFSET_HEIGHT;
             LevelWidth = levelWidth;
             LevelDirection = 1;
             LevelDimention = 0;
             LastHitTime = new DateTime();
             UltimateCooldownTime = new DateTime();
+            AnimationsPack = new Bob();
 
             Y = LevelHeight - ENTITY_HEIGHT - 1;
             X = LevelWidth / 2;
             ScoreCount = 0;
             HealthCount = 6;
-            IsAlive = true;
-            AnimationsPack = new Bob();
-            CurrentAnimation = AnimationsPack.Celebrate;
             OnceAnimationType = 3;
+
             IsOnceAnimated = true;
-        } 
+            IsAlive = true; 
+
+            CurrentAnimation = AnimationsPack.Celebrate;
+            FireAnimation = AnimationsPack.Fire;
+            SmokeAnimation = AnimationsPack.Smoke; 
+        }
          
         public bool GetPLayerStrikeStatus()
         {
@@ -258,11 +259,13 @@ namespace CorridorGravity.GameLogic
                 OnceAnimationType = 2;
             else if(AnimationType != 5)
                 OnceAnimationType = AnimationType;
-            else if((DateTime.Now - UltimateCooldownTime).TotalSeconds > COOLDOWN_LIMIT)
+            else if(IsUltimateReady)
             {
                 UltimateCooldownTime = DateTime.Now;
                 OnceAnimationType = 5;
                 IsUsingUltimate = true;
+                IsUltimateReady = false;
+                IsSmoky = true;
             }
         }
 
@@ -608,22 +611,41 @@ namespace CorridorGravity.GameLogic
 
         public override void Update(GameTime gameTime)
         {
-            if (HealthCount < 1)                // Make sure that health is > 0
+            // Make sure that health is > 0
+            if (HealthCount < 1)                
                 IsAlive = false;
+
+            // Set ultimate ready is cooldown is over
+            if (!IsUltimateReady && (DateTime.Now - UltimateCooldownTime).TotalSeconds > COOLDOWN_LIMIT)
+            {
+                IsUltimateReady = true;
+            }
 
             UpdateVelocityBasedOnInput();
 
             UpdateCoordinatesBasedOnVelocity(gameTime);
+            
+            // Fire (ready animation) and smoke (not ready)
+            if(IsUltimateReady)
+            {
+                FireAnimation.UpdateCycleAnimation(gameTime);
+            }
+            else if(IsSmoky)
+            {
+                IsSmoky = SmokeAnimation.UpdateSingleAnimationIsEnded(gameTime);
+            }
 
-            if(!IsAlive)                        // Is got killed, set die animation
+            // Is got killed, set die animation
+            if(!IsAlive)                                            
             {
                 IsOnceAnimated = true;
                 OnceAnimationType = 4;
             } 
 
             UpdateAnimationBasedOnVelocity();
-
-            if (!IsOnceAnimated && IsAlive)                         // If alive and not onceAnim, play cycle animation
+            
+            // If alive and not onceAnim, play cycle animation
+            if (!IsOnceAnimated && IsAlive)                         
                 CurrentAnimation.UpdateCycleAnimation(gameTime);
             else
             { 
@@ -682,7 +704,7 @@ namespace CorridorGravity.GameLogic
             {
                 case 0:
                     if (RotationAngle <= ROTATION_ANGLE_LIMIT && RotationAngle > 0)
-                        RotationAngle -= RotationAngleInc;
+                        RotationAngle -= ROTATION_ANGLE_INC;
                     else RotationAngle = 0;
                     if (EntityDirection)
                         return SpriteEffects.FlipHorizontally;
@@ -690,7 +712,7 @@ namespace CorridorGravity.GameLogic
 
                 case 1:
                     if (RotationAngle >= 0 && RotationAngle < ROTATION_ANGLE_LIMIT)
-                        RotationAngle += RotationAngleInc;
+                        RotationAngle += ROTATION_ANGLE_INC;
                     else RotationAngle = ROTATION_ANGLE_LIMIT;
                     if (EntityDirection)
                         return SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
@@ -698,7 +720,7 @@ namespace CorridorGravity.GameLogic
 
                 case 2:
                     if (RotationAngle <= ROTATION_ANGLE_LIMIT && RotationAngle > 0)
-                        RotationAngle -= RotationAngleInc;
+                        RotationAngle -= ROTATION_ANGLE_INC;
                     else RotationAngle = 0;
                     if (EntityDirection)
                         return SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically;
@@ -706,7 +728,7 @@ namespace CorridorGravity.GameLogic
 
                 case 3:
                     if (RotationAngle >= 0 && RotationAngle < ROTATION_ANGLE_LIMIT)
-                        RotationAngle += RotationAngleInc;
+                        RotationAngle += ROTATION_ANGLE_INC;
                     else RotationAngle = ROTATION_ANGLE_LIMIT;
                     if (EntityDirection)
                         return SpriteEffects.FlipHorizontally;
@@ -729,21 +751,33 @@ namespace CorridorGravity.GameLogic
             else
             {
                 // Adjust coordinates
-                var AdjustedCoordinates = AdjustCoordinatesForAnimation(X, Y); 
+                var AdjustedCoordinates = AdjustCoordinatesForAnimation(X, Y);
 
                 // Entity draw
-                batcher.Draw(EntitySprite, new Vector2(AdjustedCoordinates.X, AdjustedCoordinates.Y), CurrentAnimation.CurrentRectangle, TintColor,
-                                            RotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
+                batcher.Draw(EntitySprite, new Vector2(AdjustedCoordinates.X, AdjustedCoordinates.Y),
+                                            CurrentAnimation.CurrentRectangle, TintColor,
+                                                    RotationAngle, new Vector2(1, 1), 1f, effectsApplyed, .0f);
             }
             // Portrait draw
-            batcher.Draw(EntitySprite, new Vector2(LevelWidth - LEVEL_OFFSET_HEIGHT * 2, LevelHeight + 10), AnimationsPack.Portrait.CurrentRectangle, Color.Beige,
-                            0f, new Vector2(1, 1), 1f, SpriteEffects.None, .0f);
-            
+            batcher.Draw(EntitySprite, new Vector2(LevelWidth - LEVEL_OFFSET_HEIGHT * 2, LevelHeight + LEVEL_OFFSET_HEIGHT/2), 
+                                            AnimationsPack.Portrait.CurrentRectangle, Color.Beige,
+                                                    0f, new Vector2(1, 1), 1f, SpriteEffects.None, .0f);
+            // Fire or Smoke animation
+            if(IsUltimateReady)
+                batcher.Draw(FireSmokeSprite, new Vector2(LevelWidth /2 - LEVEL_OFFSET_HEIGHT, LevelHeight /2 - LevelHeight / 4.23f), 
+                                            FireAnimation.CurrentRectangle, Color.Beige,
+                                                0f, new Vector2(1, 1), .5f, SpriteEffects.None, .0f);
+            else if(IsSmoky)
+                batcher.Draw(FireSmokeSprite, new Vector2(LevelWidth/ 2 - LEVEL_OFFSET_HEIGHT * 1.5f, LevelHeight /2 - LevelHeight / 4.63f), 
+                                            SmokeAnimation.CurrentRectangle, Color.Beige,
+                                                 0f, new Vector2(1, 1), .5f, SpriteEffects.None, .0f);
+             
             // Health bar draw
             for(int i = 0; i < HealthCount; i++)
             { 
-                batcher.Draw(EntitySprite, new Vector2(HealthBarAxisX, LevelHeight), AnimationsPack.Health.CurrentRectangle, Color.Beige,
-                 0f, new Vector2(1, 1), 1f, SpriteEffects.None, .0f);
+                batcher.Draw(EntitySprite, new Vector2(HealthBarAxisX, LevelHeight), 
+                                    AnimationsPack.Health.CurrentRectangle, Color.Beige,
+                                         0f, new Vector2(1, 1), 1f, SpriteEffects.None, .0f);
                 HealthBarAxisX += HealthBarInc;
             }
 

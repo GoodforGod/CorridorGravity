@@ -19,18 +19,6 @@
 /processorParam:TextureFormat=Compressed
 /build:score-font.spritefont
 
-#begin health-bar.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:health-bar.png
-
 #begin player-1-white-1.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -115,18 +103,6 @@
 /processorParam:TextureFormat=Color
 /build:intro-1.png
 
-#begin world-background-score-1.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:world-background-score-1.png
-
 #begin xdimebagx-atmosphere-horror-loop.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
@@ -186,4 +162,28 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:player-2-white-3.png
+
+#begin fire-smoke.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:fire-smoke.png
+
+#begin world-background-score-2.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:world-background-score-2.png
 

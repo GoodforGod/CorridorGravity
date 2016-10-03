@@ -22,7 +22,7 @@ Eye is watching you...
  - Visual Studio 2015 CE
 
 # Version :date:
- *Beta 1.0.0*
+ *Beta 1.0.1*
 
 # Ifno :speech_balloon:
 

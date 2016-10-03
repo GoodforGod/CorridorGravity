@@ -26,6 +26,8 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             Portrait = new Animation();
             Health = new Animation();
             Ultimate = new Animation();
+            Fire = new Animation();
+            Smoke = new Animation();
 
             // Idle 192x84 (each 48x84) start in 6x15
             Idle.AddFrame(new Rectangle(6, 15, 48, 90), TimeSpan.FromSeconds(INTERVAL_DEFAULT));
@@ -100,7 +102,6 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
             Ultimate.AddFrame(new Rectangle(550, 608, 48, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             Ultimate.AddFrame(new Rectangle(0, 608, 65, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             Ultimate.AddFrame(new Rectangle(62, 608, 67, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
-
             // Loop start
             for (int i = 0; i < ULTIMATE_LENGTH; i++)
             { 
@@ -110,10 +111,17 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
                 Ultimate.AddFrame(new Rectangle(386, 608, 75, 120), TimeSpan.FromSeconds(INTERVAL_ULTIMATE));
             }
             // Loop end
-
             Ultimate.AddFrame(new Rectangle(476, 608, 48, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
             Ultimate.AddFrame(new Rectangle(550, 608, 48, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
 
+            // Fire (each 84x170) start in 155x75
+            for (int i = 142; i < 6000; i += 400) 
+                Fire.AddFrame(new Rectangle(i, 55, 88, 170), TimeSpan.FromSeconds(INTERVAL_ATTACK));
+
+            // Smoke (each 64x120) start in 0x608
+            Smoke.AddFrame(new Rectangle(1, 1, 1, 1), TimeSpan.FromSeconds(INTERVAL_ATTACK)); 
+            for (int i = 520; i < 1690; i += 130)
+                Smoke.AddFrame(new Rectangle(i, 423, 120, 120), TimeSpan.FromSeconds(INTERVAL_ATTACK));
         }
 
         public override Animation Idle { get; }
@@ -139,5 +147,9 @@ namespace CorridorGravity.GameLogic.AnimatedEntity
         public override Animation Health { get; }
 
         public Animation Ultimate { get; }
+
+        public Animation Fire { get; }
+
+        public Animation Smoke { get; }
     }
 }
