@@ -7,8 +7,8 @@ Game was created during 1 week, from the beginning to the end, with no practice 
 
 "Eye is watching you... "
 
-<a href="https://www.youtube.com/watch?v=jfA7H3mg56I" target="_blank">
-<img src="https://img.youtube.com/vi/jfA7H3mg56I/0.jpg" 
+<a href="https://www.youtube.com/watch?v=FaKPlOmHMng" target="_blank">
+<img src="http://i3.ytimg.com/vi/FaKPlOmHMng/maxresdefault.jpg" 
 alt="TRAILER" width="480" height="360" border="10"/>
 </a>
 
